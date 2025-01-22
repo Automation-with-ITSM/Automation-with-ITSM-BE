@@ -32,4 +32,13 @@ public class BankAccountService {
 
 		return bankAccountRepository.saveAll(bankAccounts);
 	}
+
+	// 특정 초대장 계좌 정보를 조회하여 DTO 리스트로 변환
+	public List<BankAccountDTO> getBankAccounts(Invitation invitation) {
+		List<BankAccounts> bankAccounts = bankAccountRepository.findByInvitation(invitation);
+
+		return bankAccounts.stream() // 스트림 생성
+			.map(BankAccountDTO::from) // entity -> DTO
+			.collect(Collectors.toList()); // 리스트로 수집
+	}
 }
