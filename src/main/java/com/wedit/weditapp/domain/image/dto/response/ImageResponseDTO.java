@@ -5,7 +5,11 @@ import com.wedit.weditapp.domain.image.domain.Image;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 public class ImageResponseDTO {
 	@NotBlank(message = "url cannot be blank")
 	private String url;
