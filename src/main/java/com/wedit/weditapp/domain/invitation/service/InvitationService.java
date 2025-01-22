@@ -67,7 +67,7 @@ public class InvitationService {
 		//return InvitationResponseDTO.from(invitationRepository.save(invitation));
 	}
 
-	private InvitationResponseDTO getInvitation(Long invitationId) {
+	public InvitationResponseDTO getInvitation(Long invitationId) {
 		// 초대장 조회
 		Invitation invitation  = invitationRepository.findById(invitationId)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
