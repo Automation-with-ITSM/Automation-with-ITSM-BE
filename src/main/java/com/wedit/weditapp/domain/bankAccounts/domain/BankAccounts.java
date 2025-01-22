@@ -1,5 +1,6 @@
 package com.wedit.weditapp.domain.bankAccounts.domain;
 
+import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.AccountSide;
 import com.wedit.weditapp.domain.shared.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -31,25 +32,27 @@ public class BankAccounts extends BaseTimeEntity {
     @Column(nullable = false)
     private String accountHolder;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "invitation_id", nullable = false)
-//    private Invitations invitations;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invitation_id", nullable = false)
+    private Invitation invitation;
 
     @Builder
-    private BankAccounts(AccountSide side, String accountNumber, String bankName, String accountHolder){
+    private BankAccounts(AccountSide side, String accountNumber, String bankName, String accountHolder, Invitation invitation) {
         this.side = side;
         this.accountNumber = accountNumber;
         this.bankName = bankName;
         this.accountHolder = accountHolder;
+        this.invitation = invitation;
     }
 
-    public static BankAccounts createBankAccount(AccountSide side, String accountNumber, String bankName, String accountHolder){
+    public static BankAccounts createBankAccount(AccountSide side, String accountNumber, String bankName, String accountHolder, Invitation invitation) {
         return BankAccounts.builder()
-                .side(side)
-                .accountNumber(accountNumber)
-                .bankName(bankName)
-                .accountHolder(accountHolder)
-                .build();
+            .side(side)
+            .accountNumber(accountNumber)
+            .bankName(bankName)
+            .accountHolder(accountHolder)
+            .invitation(invitation)
+            .build();
     }
 
 }

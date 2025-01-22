@@ -7,9 +7,9 @@ public enum Theme {
     TRADITIONAL("전통형"),
     BASIC("일반형");
 
-    private final String themeType;
+    private final String theme;
 
-    Theme(String themeType) {
-        this.themeType = themeType;
+    Theme(String theme) {
+        this.theme = theme;
     }
 }
