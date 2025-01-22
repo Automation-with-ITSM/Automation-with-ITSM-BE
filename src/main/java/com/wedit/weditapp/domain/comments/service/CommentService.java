@@ -37,19 +37,20 @@ public class CommentService {
             throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
         }
 
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdAt").descending());
-        Page<Comments> comments = commentRepository.findByInvitationId(invitationId, pageable);
 
-        // Comments 엔티티 -> DTO 리스트로 변환
-        List<CommentResponseDTO> commentList = comments.getContent().stream()
-                .map(CommentResponseDTO::from)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdAt").descending());
+        Page<Comments> commentPage = commentRepository.findByInvitationId(invitationId, pageable);
+
+        if(commentPage.isEmpty()){
+            throw new CommonException(ErrorCode.NO_MORE_COMMENTS);
+        }
+
+        // Comments 엔티티 -> DTO로 변환
+        Page<CommentResponseDTO> commentDTOPage = commentPage.map(CommentResponseDTO::from);
 
         // 필요한 정보만으로 DTO 생성
-        return PagedCommentResponseDTO.builder()
-                .comments(commentList)
-                .isLast(comments.isLast())
-                .currentPage(page)
-                .build();
+        return PagedCommentResponseDTO.of(commentDTOPage, commentPage.isLast(), page);
+
+
     }
 }

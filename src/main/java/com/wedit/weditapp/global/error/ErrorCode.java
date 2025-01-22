@@ -27,7 +27,8 @@ public enum ErrorCode {
 	DELETE_FORBIDDEN(403, "DELETE_FORBIDDEN", "삭제 권한이 없습니다."),
 
 	// 방명록
-	INVALID_PAGE_NUMBER(400, "INVALID_PAGE_NUMBER", "페이지 번호는 1 이상이어야 합니다.");
+	INVALID_PAGE_NUMBER(400, "INVALID_PAGE_NUMBER", "페이지 번호는 1 이상이어야 합니다."),
+	NO_MORE_COMMENTS(404, "NO_MORE_COMMENTS", "더 이상 방명록이 존재하지 않습니다.");
 
 	private final int status;
 	private final String code;
