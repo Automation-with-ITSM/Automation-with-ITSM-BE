@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.wedit.weditapp.domain.bankAccounts.domain.BankAccounts;
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDTO;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
+import com.wedit.weditapp.domain.image.dto.response.ImageResponseDTO;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
@@ -73,8 +74,9 @@ public class InvitationService {
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		List<BankAccountDTO> bankAccounts = bankAccountService.getBankAccounts(invitation);
+		List<ImageResponseDTO> images = imageService.getImages(invitation);
 
-		return InvitationResponseDTO.from(invitation, bankAccounts);
+		return InvitationResponseDTO.from(invitation, bankAccounts, images);
 	}
 
 	private Member getMember(Long memberId) {

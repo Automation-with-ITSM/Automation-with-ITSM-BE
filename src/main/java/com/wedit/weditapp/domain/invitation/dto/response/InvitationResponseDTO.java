@@ -1,6 +1,7 @@
 package com.wedit.weditapp.domain.invitation.dto.response;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDTO;
+import com.wedit.weditapp.domain.image.dto.response.ImageResponseDTO;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.Theme;
 
@@ -50,11 +51,13 @@ public class InvitationResponseDTO {
 
     private List<BankAccountDTO> bankAccounts; // 계좌 정보 리스트
 
+    private List<ImageResponseDTO> image;
+
     // DTO 생성 후 활성화
     //private List<GuestbookResponseDTO> guestbooks; // 방명록 리스트
 
     @Builder
-    private InvitationResponseDTO(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDTO> bankAccounts
+    private InvitationResponseDTO(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDTO> bankAccounts, List<ImageResponseDTO> image
             //, List<GuestbookResponseDTO> guestbooks
     ) {
         this.groom = groom;
@@ -72,30 +75,32 @@ public class InvitationResponseDTO {
         this.decisionOption = decisionOption;
         this.accountOption = accountOption;
         this.bankAccounts = bankAccounts;
+        this.image = image;
         //this.guestbooks = guestbooks;
     }
 
-    public static InvitationResponseDTO from(Invitation invitation, List<BankAccountDTO> bankAccounts
+    public static InvitationResponseDTO from(Invitation invitation, List<BankAccountDTO> bankAccounts, List<ImageResponseDTO> image
             //, List<GuestbookResponseDTO> guestbooks
     ) {
         return InvitationResponseDTO.builder()
-                .groom(invitation.getGroom())
-                .bride(invitation.getBride())
-                .groomF(invitation.getGroomF())
-                .groomM(invitation.getGroomM())
-                .brideF(invitation.getBrideF())
-                .brideM(invitation.getBrideM())
-                .address(invitation.getAddress())
-                .extraAddress(invitation.getExtraAddress())
-                .date(invitation.getDate())
-                .theme(invitation.getTheme())
-                .distribution(invitation.getDistribution())
-                .guestBookOption(invitation.isGuestBookOption())
-                .decisionOption(invitation.isDecisionOption())
-                .accountOption(invitation.isAccountOption())
-                .bankAccounts(bankAccounts)
-                //.guestbooks(guestbooks)
-                .build();
+            .groom(invitation.getGroom())
+            .bride(invitation.getBride())
+            .groomF(invitation.getGroomF())
+            .groomM(invitation.getGroomM())
+            .brideF(invitation.getBrideF())
+            .brideM(invitation.getBrideM())
+            .address(invitation.getAddress())
+            .extraAddress(invitation.getExtraAddress())
+            .date(invitation.getDate())
+            .theme(invitation.getTheme())
+            .distribution(invitation.getDistribution())
+            .guestBookOption(invitation.isGuestBookOption())
+            .decisionOption(invitation.isDecisionOption())
+            .accountOption(invitation.isAccountOption())
+            .bankAccounts(bankAccounts)
+            .image(image)
+            //.guestbooks(guestbooks)
+            .build();
     }
 }
 

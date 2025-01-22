@@ -35,7 +35,6 @@ public class InvitationUpdateRequestDTO {
     @NotBlank(message = "date cannot be blank")
     private LocalDate date; // 결혼식 날짜
 
-    @NotBlank(message = "theme cannot be blank")
     private Theme theme; // 테마
 
     private String distribution; // 청첩장 URL
