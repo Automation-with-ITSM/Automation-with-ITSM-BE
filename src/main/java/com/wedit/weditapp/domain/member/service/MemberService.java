@@ -2,13 +2,9 @@ package com.wedit.weditapp.domain.member.service;
 
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
-import com.wedit.weditapp.domain.member.dto.LoginRequestDto;
-import com.wedit.weditapp.domain.member.dto.MemberRequestDto;
-import com.wedit.weditapp.domain.member.dto.MemberResponseDto;
-import com.wedit.weditapp.domain.member.dto.TokenResponseDto;
+import com.wedit.weditapp.domain.member.dto.response.MemberResponseDto;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;
-import com.wedit.weditapp.global.auth.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

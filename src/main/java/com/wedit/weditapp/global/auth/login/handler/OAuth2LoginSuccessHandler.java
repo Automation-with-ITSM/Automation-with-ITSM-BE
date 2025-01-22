@@ -46,10 +46,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             log.info("새 Refresh Token 발급: {}", refreshToken);
         }
 
-        // 4) 클라이언트로 토큰 전달 by 헤더 사용
+        // 4. 클라이언트로 토큰 전달 by 헤더 사용
         jwtProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
 
-        // 5) 응답
+        // 5. 응답
         response.sendRedirect("/");
     }
 }

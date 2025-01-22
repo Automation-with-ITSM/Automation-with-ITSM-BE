@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.member.dto;
+package com.wedit.weditapp.domain.member.dto.response;
 
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.shared.MemberRole;

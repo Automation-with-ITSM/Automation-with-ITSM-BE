@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.member.dto;
+package com.wedit.weditapp.domain.member.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

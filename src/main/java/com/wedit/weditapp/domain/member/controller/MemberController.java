@@ -1,18 +1,12 @@
 package com.wedit.weditapp.domain.member.controller;
 
-import com.wedit.weditapp.domain.member.domain.Member;
-import com.wedit.weditapp.domain.member.dto.LoginRequestDto;
-import com.wedit.weditapp.domain.member.dto.MemberRequestDto;
-import com.wedit.weditapp.domain.member.dto.MemberResponseDto;
-import com.wedit.weditapp.domain.member.dto.TokenResponseDto;
+import com.wedit.weditapp.domain.member.dto.response.MemberResponseDto;
 import com.wedit.weditapp.domain.member.service.MemberService;
 import com.wedit.weditapp.global.response.GlobalResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

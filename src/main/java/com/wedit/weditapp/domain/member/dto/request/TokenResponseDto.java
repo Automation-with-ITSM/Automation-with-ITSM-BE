@@ -1,8 +1,5 @@
-package com.wedit.weditapp.domain.member.dto;
+package com.wedit.weditapp.domain.member.dto.request;
 
-import com.wedit.weditapp.domain.member.domain.Member;
-import com.wedit.weditapp.domain.shared.MemberRole;
-import com.wedit.weditapp.domain.shared.MemberStatus;
 import lombok.Builder;
 import lombok.Getter;
 
