@@ -25,17 +25,4 @@ public class OAuthAttributes {
                 .oauth2UserInfo(new KakaoOAuth2UserInfo(attributes))
                 .build();
     }
-
-    // 이건 나중에 서비스나 엔티티 생성 로직에서 처리하는 게 더 나음
-//    public User toEntity(SocialType socialType, OAuth2UserInfo oauth2UserInfo) {
-//        return User.builder()
-//                .socialType(socialType)
-//                .socialId(oauth2UserInfo.getId())
-//                .email(UUID.randomUUID() + "@socialUser.com")
-//                .nickname(oauth2UserInfo.getNickname())
-//                .imageUrl(oauth2UserInfo.getImageUrl())
-//                .role(Role.GUEST)
-//                .build();
-//    }
-
 }
