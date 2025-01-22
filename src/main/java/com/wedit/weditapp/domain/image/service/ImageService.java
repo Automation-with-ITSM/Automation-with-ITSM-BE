@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wedit.weditapp.domain.image.domain.Image;
 import com.wedit.weditapp.domain.image.domain.repository.ImageRepository;
-import com.wedit.weditapp.domain.image.dto.response.ImageResponseDTO;
+import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.S3Service;
 
@@ -44,11 +44,11 @@ public class ImageService {
 	}
 
 	// 특정 청첩장 사진들을 조회하여 DTO 리스트로 변환
-	public List<ImageResponseDTO> getImages(Invitation invitation) {
+	public List<ImageResponseDto> getImages(Invitation invitation) {
 		List<Image> image = imageRepository.findByInvitation(invitation);
 
 		return image.stream() // 스트림 생성
-			.map(ImageResponseDTO::from) // entity -> DTO
+			.map(ImageResponseDto::from) // entity -> DTO
 			.collect(Collectors.toList()); // 리스트로 수집
 	}
 }
