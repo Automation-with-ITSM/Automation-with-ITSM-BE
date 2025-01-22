@@ -3,6 +3,7 @@ package com.wedit.weditapp.domain.comments.service;
 import com.wedit.weditapp.domain.comments.domain.Comments;
 import com.wedit.weditapp.domain.comments.domain.repository.CommentRepository;
 import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDTO;
+import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDTO;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +26,30 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
 
-    public Page<CommentResponseDTO> findAllCommentsByInvitationId(Long invitationId, int page){
+    public PagedCommentResponseDTO findAllCommentsByInvitationId(Long invitationId, int page){
 
 //        boolean existsInvitation = invitationRepository.existById(invitationId);
 //        if(!existsInvitation){
 //            throw new CommonException(ErrorCode.INVITATION_NOT_FOUND);
 //        }
 
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("createdAt").descending());
+        if(page < 1){
+            throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdAt").descending());
         Page<Comments> comments = commentRepository.findByInvitationId(invitationId, pageable);
 
-        return comments.map(CommentResponseDTO::from);
+        // Comments 엔티티 -> DTO 리스트로 변환
+        List<CommentResponseDTO> commentList = comments.getContent().stream()
+                .map(CommentResponseDTO::from)
+                .collect(Collectors.toList());
+
+        // 필요한 정보만으로 DTO 생성
+        return PagedCommentResponseDTO.builder()
+                .comments(commentList)
+                .isLast(comments.isLast())
+                .currentPage(page)
+                .build();
     }
 }

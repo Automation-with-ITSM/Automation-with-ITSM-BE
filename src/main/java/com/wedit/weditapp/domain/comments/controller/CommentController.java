@@ -1,6 +1,7 @@
 package com.wedit.weditapp.domain.comments.controller;
 
 import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDTO;
+import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDTO;
 import com.wedit.weditapp.domain.comments.service.CommentService;
 import com.wedit.weditapp.global.response.GlobalResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,11 +30,11 @@ public class CommentController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/{invitationId}")
-    public ResponseEntity<GlobalResponseDto<Page<CommentResponseDTO>>> findAllComments(
+    public ResponseEntity<GlobalResponseDto<PagedCommentResponseDTO>> findAllComments(
             @PathVariable Long invitationId,
-            @RequestParam(defaultValue = "0") int page){
+            @RequestParam(defaultValue = "1") int page){
 
-        Page<CommentResponseDTO> comments = commentService.findAllCommentsByInvitationId(invitationId, page);
-        return ResponseEntity.ok(GlobalResponseDto.success(comments));
+        PagedCommentResponseDTO response = commentService.findAllCommentsByInvitationId(invitationId, page);
+        return ResponseEntity.status(HttpStatus.OK).body(GlobalResponseDto.success(response));
     }
 }

@@ -24,7 +24,10 @@ public enum ErrorCode {
 	DUPLICATE_NICKNAME(409, "NICKNAME_ALREADY_EXISTS", "이미 존재하는 닉네임입니다."),
 
 	//작업
-	DELETE_FORBIDDEN(403, "DELETE_FORBIDDEN", "삭제 권한이 없습니다.");
+	DELETE_FORBIDDEN(403, "DELETE_FORBIDDEN", "삭제 권한이 없습니다."),
+
+	// 방명록
+	INVALID_PAGE_NUMBER(400, "INVALID_PAGE_NUMBER", "페이지 번호는 1 이상이어야 합니다.");
 
 	private final int status;
 	private final String code;

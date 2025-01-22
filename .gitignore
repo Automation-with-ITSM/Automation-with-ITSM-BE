@@ -11,7 +11,7 @@ application-dev.yaml
 application-local.yaml
 application-jwt.yaml
 application-oauth.yaml
-Application-bucket.yaml
+application-bucket.yaml
 
 ### macOS ###
 .DS_Store
