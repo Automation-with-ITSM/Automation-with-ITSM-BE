@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Slf4j
@@ -46,10 +48,16 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             log.info("새 Refresh Token 발급: {}", refreshToken);
         }
 
-        // 4. 클라이언트로 토큰 전달 by 헤더 사용
         jwtProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
 
-        // 5. 응답
-        response.setStatus(HttpServletResponse.SC_OK);
+        String encodedAccessToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+        String encodedRefreshToken = URLEncoder.encode(refreshToken, StandardCharsets.UTF_8);
+
+        // 리다이렉트 주소
+        String redirectUrl = "http://localhost:3000/login-success"
+                + "?accessToken=" + encodedAccessToken
+                + "&refreshToken=" + encodedRefreshToken;
+
+        response.sendRedirect(redirectUrl);
     }
 }
