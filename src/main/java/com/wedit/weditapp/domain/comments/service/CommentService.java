@@ -2,8 +2,11 @@ package com.wedit.weditapp.domain.comments.service;
 
 import com.wedit.weditapp.domain.comments.domain.Comments;
 import com.wedit.weditapp.domain.comments.domain.repository.CommentRepository;
+import com.wedit.weditapp.domain.comments.dto.request.CommentCreateRequestDTO;
 import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDTO;
 import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDTO;
+import com.wedit.weditapp.domain.invitation.domain.Invitation;
+import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class CommentService {
     private static final int PAGE_SIZE = 4; // 한 페이지에 보여줄 방명록 개수
 
     private final CommentRepository commentRepository;
+    private final InvitationRepository invitationRepository;
 
     public PagedCommentResponseDTO findAllCommentsByInvitationId(Long invitationId, int page){
 
@@ -52,5 +56,21 @@ public class CommentService {
         return PagedCommentResponseDTO.of(commentDTOPage, commentPage.isLast(), page);
 
 
+    }
+
+    // 방명록 등록
+    public Comments createComment(CommentCreateRequestDTO commentCreateRequestDTO) {
+
+        Invitation invitation = invitationRepository.findById(commentCreateRequestDTO.getInvitationId())
+                .orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+
+        Comments comment = Comments.createComment(
+                commentCreateRequestDTO.getName(),
+                commentCreateRequestDTO.getContent(),
+                invitation
+        );
+
+        return commentRepository.save(comment);
     }
 }
