@@ -22,8 +22,8 @@ public class MemberController {
     // 모든 회원 조회 API
     @Operation(summary = "모든 회원 조회", description = "등록된 모든 회원의 정보를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "조회 성공"),
-            @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "회원 목록을 찾을 수 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping
@@ -35,13 +35,14 @@ public class MemberController {
     // 단일 회원 조회 API
     @Operation(summary = "단일 회원 조회", description = "해당 id를 가진 회원의 정보를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "조회 성공"),
-            @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "해당 회원을 찾을 수 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/{userId}")
     public ResponseEntity<GlobalResponseDto<MemberResponseDto>> findMember(
-        @PathVariable Long userId) {
-        return ResponseEntity.ok(GlobalResponseDto.success(memberService.findMember(userId)));
+            @PathVariable Long userId) {
+        MemberResponseDto memberResponse = memberService.findMember(userId);
+        return ResponseEntity.ok(GlobalResponseDto.success(memberResponse));
     }
 }

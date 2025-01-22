@@ -22,8 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String NO_CHECK_URL = "/login"; // "/login" 요청은 필터 제외
-
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
 
@@ -31,11 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // "/login" 요청은 필터 제외
-        if (request.getRequestURI().equals(NO_CHECK_URL)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         // RefreshToken 처리
         String refreshToken = jwtProvider.extractRefreshToken(request)
@@ -73,18 +66,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // AccessToken을 사용하여 사용자 인증
     private void authenticate(String accessToken) {
         jwtProvider.extractEmail(accessToken).ifPresent(email -> {
-            Optional<Member> memberOptional = memberRepository.findByEmail(email);
-            if (memberOptional.isPresent()) {
-                Member member = memberOptional.get();
-
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        member, null, member.getAuthorities());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.info("사용자 인증 완료: {}", email);
-            } else {
-                log.error("AccessToken의 이메일 정보와 일치하는 사용자가 없습니다.");
-            }
+            memberRepository.findByEmail(email).ifPresentOrElse(
+                    member -> {
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                member, null, member.getAuthorities()
+                        );
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        log.info("사용자 인증 완료: {}", email);
+                    },
+                    () -> log.error("AccessToken의 이메일 정보와 일치하는 사용자가 없습니다.")
+            );
         });
     }
 }

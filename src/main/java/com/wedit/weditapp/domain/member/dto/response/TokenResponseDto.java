@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.member.dto.request;
+package com.wedit.weditapp.domain.member.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
