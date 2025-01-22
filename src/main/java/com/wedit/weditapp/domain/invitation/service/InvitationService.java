@@ -28,33 +28,33 @@ public class InvitationService {
 	private final MemberRepository memberRepository;
 	private final BankAccountService bankAccountService;
 
-	public Void createInvitation(Long memberId, InvitationCreateRequestDTO request, List<MultipartFile> images) {
+	public Void createInvitation(Long memberId, InvitationCreateRequestDTO invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(memberId);
 		// Invitation 생성
 		Invitation invitation = Invitation.createInvitation(
 			member,
-			request.getGroom(),
-			request.getBride(),
-			request.getGroomF(),
-			request.getGroomM(),
-			request.getBrideF(),
-			request.getBrideM(),
-			request.getAddress(),
-			request.getExtraAddress(),
-			request.getDate(),
-			Theme.valueOf(request.getTheme()), // 문자열을 Enum으로 변환
-			request.getDistribution(),
-			request.isGuestBookOption(),
-			request.isDecisionOption(),
-			request.isAccountOption()
+			invitationRequest.getGroom(),
+			invitationRequest.getBride(),
+			invitationRequest.getGroomF(),
+			invitationRequest.getGroomM(),
+			invitationRequest.getBrideF(),
+			invitationRequest.getBrideM(),
+			invitationRequest.getAddress(),
+			invitationRequest.getExtraAddress(),
+			invitationRequest.getDate(),
+			invitationRequest.getTheme(),
+			invitationRequest.getDistribution(),
+			invitationRequest.isGuestBookOption(),
+			invitationRequest.isDecisionOption(),
+			invitationRequest.isAccountOption()
 		);
 
 		// 초대장 저장
 		invitationRepository.save(invitation);
 
 		// 계좌 정보 저장
-		if (request.isAccountOption() && request.getBankAccounts() != null) {
-			bankAccountService.createBankAccounts(request.getBankAccounts(), invitation);
+		if (invitationRequest.isAccountOption() && invitationRequest.getBankAccounts() != null) {
+			bankAccountService.createBankAccounts(invitationRequest.getBankAccounts(), invitation);
 		}
 
 		// 이미지 저장

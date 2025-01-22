@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDTO;
+import com.wedit.weditapp.domain.shared.Theme;
 
 @Getter
 @NoArgsConstructor
@@ -34,7 +35,7 @@ public class InvitationCreateRequestDTO {
     private LocalDate date; // 결혼식 날짜
 
     @NotBlank(message = "theme cannot be blank")
-    private String theme; // 테마
+    private Theme theme; // 테마
 
     private String distribution; // 청첩장 URL
 
