@@ -14,9 +14,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -50,14 +47,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         jwtProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
 
-        String encodedAccessToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
-        String encodedRefreshToken = URLEncoder.encode(refreshToken, StandardCharsets.UTF_8);
-
-        // 리다이렉트 주소
-        String redirectUrl = "http://localhost:3000/login-success"
-                + "?accessToken=" + encodedAccessToken
-                + "&refreshToken=" + encodedRefreshToken;
-
-        response.sendRedirect(redirectUrl);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }
