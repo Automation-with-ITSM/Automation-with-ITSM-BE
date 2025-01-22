@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wedit.weditapp.domain.bankAccounts.domain.BankAccounts;
-import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDTO;
 import com.wedit.weditapp.domain.image.domain.Image;
 import com.wedit.weditapp.domain.image.domain.repository.ImageRepository;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDTO;
@@ -54,5 +52,3 @@ public class ImageService {
 			.collect(Collectors.toList()); // 리스트로 수집
 	}
 }
-
-

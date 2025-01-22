@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wedit.weditapp.domain.bankAccounts.domain.BankAccounts;
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDTO;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDTO;
@@ -16,7 +15,6 @@ import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestD
 import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDTO;
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
-import com.wedit.weditapp.domain.shared.Theme;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;
 

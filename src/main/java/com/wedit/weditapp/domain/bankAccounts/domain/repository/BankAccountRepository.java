@@ -9,4 +9,3 @@ import com.wedit.weditapp.domain.invitation.domain.Invitation;
 public interface BankAccountRepository extends JpaRepository<BankAccounts, Long> {
 	List<BankAccounts> findByInvitation(Invitation invitation);
 }
-
