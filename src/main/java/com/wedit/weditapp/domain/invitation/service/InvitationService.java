@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wedit.weditapp.domain.bankAccounts.domain.BankAccounts;
+import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDTO;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
 import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestDTO;
+import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDTO;
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
 import com.wedit.weditapp.domain.shared.Theme;
@@ -62,6 +65,16 @@ public class InvitationService {
 
 		return null;
 		//return InvitationResponseDTO.from(invitationRepository.save(invitation));
+	}
+
+	private InvitationResponseDTO getInvitation(Long invitationId) {
+		// 초대장 조회
+		Invitation invitation  = invitationRepository.findById(invitationId)
+			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		List<BankAccountDTO> bankAccounts = bankAccountService.getBankAccounts(invitation);
+
+		return InvitationResponseDTO.from(invitation, bankAccounts);
 	}
 
 	private Member getMember(Long memberId) {
