@@ -50,6 +50,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         jwtProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
 
         // 5. 응답
-        response.sendRedirect("/");
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

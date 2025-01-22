@@ -6,9 +6,11 @@ import com.wedit.weditapp.global.auth.login.service.CustomOAuth2UserService;
 import com.wedit.weditapp.global.auth.jwt.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -42,7 +44,7 @@ public class SecurityConfig {
 				.cors(Customizer.withDefaults())
 
 				// 2. 세션 관련 정책 추가 : 세션 방식 사용 X (오직 JWT만 사용)
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
 				.headers(headers ->
 						headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
@@ -51,8 +53,6 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/v3/api-docs/**",
 								"/swagger-ui/**",
-								"/api/members/login",
-								"/api/members/signup",
 								"/oauth2/**")
 						.permitAll()
 						.anyRequest().authenticated()
@@ -60,17 +60,21 @@ public class SecurityConfig {
 
 				// 4. OAuth2 설정
 				.oauth2Login(oauth2 -> oauth2
-						.userInfoEndpoint(userInfo ->
-								userInfo.userService(customOAuth2UserService)
-						)
+						.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
 						.successHandler(oAuth2LoginSuccessHandler)
 						.failureHandler(oAuth2LoginFailureHandler)
 				)
+
+				// 5. JWT 필터 등록
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-		// 5. JWT 인증 필터 등록
-
 		return http.build();
+	}
+
+	@Bean
+	public WebSecurityCustomizer webSecurityCustomizer() {
+		return (web) -> web.ignoring()
+				.requestMatchers("/favicon.ico");
 	}
 
 	@Bean
