@@ -109,6 +109,8 @@ public class InvitationService {
 		if (newImages != null && !newImages.isEmpty()) {
 			imageService.updateImages(newImages, invitation);
 		}
+
+		//invitationRepository.save(invitation);
 	}
 
 	private Member getMember(Long memberId) {

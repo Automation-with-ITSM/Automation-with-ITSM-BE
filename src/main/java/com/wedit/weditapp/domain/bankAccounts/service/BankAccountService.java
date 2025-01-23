@@ -46,21 +46,34 @@ public class BankAccountService {
 
 	// 계좌 정보 수정
 	public void updateBankAccount(List<BankAccountDto> bankAccountDtos, Invitation invitation) {
-
-		List<BankAccount> bankAccounts = bankAccountDtos.stream()
+		List<BankAccount> updatedAccounts = bankAccountDtos.stream()
 			.map(dto -> {
 				BankAccount account = bankAccountRepository.findByInvitationAndSide(invitation, dto.getSide());
-				account.updateBankAccount(
-					dto.getSide(),
-					dto.getAccountNumber(),
-					dto.getBankName(),
-					dto.getAccountHolder(),
-					invitation);
+
+				if (account != null) {
+					// 기존 계좌 업데이트
+					account.updateBankAccount(
+						dto.getSide(),
+						dto.getAccountNumber(),
+						dto.getBankName(),
+						dto.getAccountHolder(),
+						invitation
+					);
+				} else {
+					// 새 계좌 생성
+					account = BankAccount.createBankAccount(
+						dto.getSide(),
+						dto.getAccountNumber(),
+						dto.getBankName(),
+						dto.getAccountHolder(),
+						invitation
+					);
+				}
 				return account;
 			})
 			.collect(Collectors.toList());
 
 		// 수정된 계좌 정보 저장
-		bankAccountRepository.saveAll(bankAccounts);
+		bankAccountRepository.saveAll(updatedAccounts);
 	}
 }

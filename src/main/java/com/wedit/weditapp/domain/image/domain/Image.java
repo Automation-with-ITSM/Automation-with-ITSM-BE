@@ -33,7 +33,7 @@ public class Image extends BaseTimeEntity {
 	@Column(nullable = false)
 	private int location;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE) // 초대장 삭제 시 이미지도 삭제
+	@ManyToOne(fetch = FetchType.LAZY) // 초대장 삭제 시 이미지도 삭제
 	@JoinColumn(name = "invitation_id", nullable = false)
 	private Invitation invitation;
 

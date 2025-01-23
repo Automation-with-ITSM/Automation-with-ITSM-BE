@@ -51,7 +51,6 @@ public class InvitationController {
 			.body(GlobalResponseDto.success(invitationService.getInvitation(invitationId)));
 	}
 
-
 	@PatchMapping(path = "/{invitationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(summary = "청첩장 수정", description = "청첩장 정보 및 이미지를 수정")
 	public ResponseEntity<GlobalResponseDto<Void>> updateInvitation(
@@ -59,7 +58,7 @@ public class InvitationController {
 		@RequestPart("images") List<MultipartFile> newImages,
 		@Valid @RequestPart("content") InvitationUpdateRequestDto updateRequest) {
 		invitationService.updateInvitation(invitationId, updateRequest, newImages);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT)
+		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
 }
