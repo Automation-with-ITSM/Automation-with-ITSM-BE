@@ -51,4 +51,10 @@ public class Image extends BaseTimeEntity {
 			.invitation(invitation)
 			.build();
 	}
+
+	public void updateImage(String url, int location, Invitation invitation) {
+		this.url = url;
+		this.location = location;
+		this.invitation = invitation;
+	}
 }
