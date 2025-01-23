@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDTO;
+import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.shared.Theme;
 
 @Getter
 @NoArgsConstructor
-public class InvitationCreateRequestDTO {
+public class InvitationCreateRequestDto {
     @NotBlank(message = "groom cannot be blank")
     private String groom; // 신랑 이름
 
@@ -34,7 +34,6 @@ public class InvitationCreateRequestDTO {
 
     private LocalDate date; // 결혼식 날짜
 
-    @NotBlank(message = "theme cannot be blank")
     private Theme theme; // 테마
 
     private String distribution; // 청첩장 URL
@@ -45,5 +44,5 @@ public class InvitationCreateRequestDTO {
 
     private boolean accountOption; // 계좌 공개 옵션
 
-    private List<BankAccountDTO> bankAccounts; // 계좌 정보 리스트
+    private List<BankAccountDto> bankAccounts; // 계좌 정보 리스트
 }

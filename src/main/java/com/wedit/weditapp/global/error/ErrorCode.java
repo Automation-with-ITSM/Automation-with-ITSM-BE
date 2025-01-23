@@ -35,7 +35,13 @@ public enum ErrorCode {
 
 	// 방명록
 	INVALID_PAGE_NUMBER(400, "INVALID_PAGE_NUMBER", "페이지 번호는 1 이상이어야 합니다."),
-	NO_MORE_COMMENTS(404, "NO_MORE_COMMENTS", "더 이상 방명록이 존재하지 않습니다.");
+	NO_MORE_COMMENTS(404, "NO_MORE_COMMENTS", "더 이상 방명록이 존재하지 않습니다."),
+
+	// 청첩장
+	INVITATION_NOT_FOUND(404, "INVITATION_NOT_FOUND", "청첩장을 찾을 수 없습니다."),
+	INVALID_INVITATION_DATE(400, "INVALID_INVITATION_DATE", "유효하지 않은 날짜입니다."),
+	ACCOUNT_OPTION_REQUIRED(400, "ACCOUNT_OPTION_REQUIRED", "계좌 옵션이 활성화되어야 합니다."),
+	IMAGE_UPLOAD_FAILED(500, "IMAGE_UPLOAD_FAILED", "이미지 업로드에 실패하였습니다.");
 
 	private final int status;
 	private final String code;

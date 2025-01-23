@@ -1,6 +1,5 @@
 package com.wedit.weditapp.domain.invitation.domain;
 
-import com.wedit.weditapp.domain.image.domain.Image;
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.shared.BaseTimeEntity;
 import com.wedit.weditapp.domain.shared.Theme;
