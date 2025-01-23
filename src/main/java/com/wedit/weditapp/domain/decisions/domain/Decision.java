@@ -1,6 +1,8 @@
 package com.wedit.weditapp.domain.decisions.domain;
 
+import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.BaseTimeEntity;
+import com.wedit.weditapp.domain.shared.DecisionSide;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "decisions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Decisions extends BaseTimeEntity {
+public class Decision extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,23 +28,29 @@ public class Decisions extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer addPerson;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "invitation_id", nullable = false)
-//    private Invitations invitations;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "side", nullable = false)
+    private DecisionSide side;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "invitation_id", nullable = false)
+    private Invitation invitation;
 
 
     @Builder
-    private Decisions(String name, String phoneNumber, Integer addPerson){
+    private Decision(String name, String phoneNumber, Integer addPerson, DecisionSide side){
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.addPerson = addPerson;
+        this.side = side;
     }
 
-    public static Decisions createDecision(String name, String phoneNumber, Integer addPerson){
-        return Decisions.builder()
+    public static Decision createDecision(String name, String phoneNumber, Integer addPerson, DecisionSide side){
+        return Decision.builder()
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .addPerson(addPerson)
+                .side(side)
                 .build();
     }
 }
