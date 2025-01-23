@@ -61,4 +61,13 @@ public class InvitationController {
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
+
+	@PostMapping("/{invitationId}/generate-url")
+	@Operation(summary = "청첩장 URL 생성", description = "UUID 기반 고유 URL 생성")
+	public ResponseEntity<GlobalResponseDto<String>> generateInvitationUrl(
+		@PathVariable Long invitationId) {
+		String url = invitationService.generateAndSaveInvitationUrl(invitationId);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success(url));
+	}
 }

@@ -131,6 +131,7 @@ public class InvitationService {
 
 			// URL 저장
 			invitation.updateUrl(generatedUrl);
+			System.out.println("생성된 url = " + invitation.getDistribution());
 			invitationRepository.save(invitation);
 		}
 
