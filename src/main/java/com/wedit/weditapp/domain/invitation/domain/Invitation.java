@@ -148,4 +148,12 @@ public class Invitation extends BaseTimeEntity {
         this.decisionOption = decisionOption;
         this.accountOption = accountOption;
     }
+
+    // URL 설정 전용 메서드
+    public void updateUrl(String url) {
+        if (this.distribution != null) {
+            throw new IllegalStateException("URL is already set.");
+        }
+        this.distribution = url;
+    }
 }

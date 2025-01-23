@@ -1,6 +1,7 @@
 package com.wedit.weditapp.domain.invitation.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -116,5 +117,23 @@ public class InvitationService {
 	private Member getMember(Long memberId) {
 		return memberRepository.findById(memberId)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+	}
+
+	public String generateAndSaveInvitationUrl(Long invitationId) {
+		// 청첩장 조회
+		Invitation invitation = invitationRepository.findById(invitationId)
+			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		// URL 생성
+		if (invitation.getDistribution() == null) {
+			String uniqueCode = UUID.randomUUID().toString(); // 고유 코드 생성
+			String generatedUrl = "https://yourdomain.com/invitations/" + uniqueCode;
+
+			// URL 저장
+			invitation.updateUrl(generatedUrl);
+			invitationRepository.save(invitation);
+		}
+
+		return invitation.getDistribution();
 	}
 }
