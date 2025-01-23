@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "invitations")
@@ -20,6 +21,9 @@ public class Invitation extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true, nullable = false, updatable = false)
+    private String uuid; // 고유한 UUID 필드 추가
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -68,12 +72,13 @@ public class Invitation extends BaseTimeEntity {
     private boolean accountOption; // 계좌 정보 공개 여부
 
     @Builder
-    private Invitation(Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
+    private Invitation(String uuid,Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
         // 필수 필드 검증
         if (member == null || groom == null || bride == null || address == null || date == null || theme == null) {
             throw new IllegalArgumentException("필수 필드 누락");
         }
 
+        this.uuid = uuid != null ? uuid : UUID.randomUUID().toString(); // UUID 자동 생성
         this.member = member;
         this.groom = groom;
         this.bride = bride;
