@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class BankAccountDTO {
+public class BankAccountDto {
 	@NotBlank(message = "side cannot be blank")
 	private AccountSide side;  // 신랑/신부 구분
 
@@ -24,15 +24,15 @@ public class BankAccountDTO {
 	private String accountHolder; // 예금주 이름
 
 	@Builder
-	private BankAccountDTO(AccountSide side, String accountNumber, String bankName, String accountHolder) {
+	private BankAccountDto(AccountSide side, String accountNumber, String bankName, String accountHolder) {
 		this.side = side;
 		this.accountNumber = accountNumber;
 		this.bankName = bankName;
 		this.accountHolder = accountHolder;
 	}
 
-	public static BankAccountDTO from(BankAccount bankAccount) {
-		return BankAccountDTO.builder()
+	public static BankAccountDto from(BankAccount bankAccount) {
+		return BankAccountDto.builder()
 			.side(bankAccount.getSide())
 			.accountNumber(bankAccount.getAccountNumber())
 			.bankName(bankAccount.getBankName())

@@ -5,14 +5,16 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
+import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
-import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestDTO;
+import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestDto;
+import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDto;
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
-import com.wedit.weditapp.domain.shared.Theme;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;
 
@@ -28,7 +30,7 @@ public class InvitationService {
 	private final MemberRepository memberRepository;
 	private final BankAccountService bankAccountService;
 
-	public Void createInvitation(Long memberId, InvitationCreateRequestDTO invitationRequest, List<MultipartFile> images) {
+	public Void createInvitation(Long memberId, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(memberId);
 		// Invitation 생성
 		Invitation invitation = Invitation.createInvitation(
@@ -62,6 +64,17 @@ public class InvitationService {
 
 		return null;
 		//return InvitationResponseDTO.from(invitationRepository.save(invitation));
+	}
+
+	public InvitationResponseDto getInvitation(Long invitationId) {
+		// 초대장 조회
+		Invitation invitation  = invitationRepository.findById(invitationId)
+			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
+		List<ImageResponseDto> images = imageService.getImages(invitation);
+
+		return InvitationResponseDto.from(invitation, bankAccounts, images);
 	}
 
 	private Member getMember(Long memberId) {
