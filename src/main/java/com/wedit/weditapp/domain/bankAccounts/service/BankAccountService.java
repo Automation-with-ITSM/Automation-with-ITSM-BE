@@ -49,7 +49,7 @@ public class BankAccountService {
 
 		List<BankAccount> bankAccounts = bankAccountDtos.stream()
 			.map(dto -> {
-				BankAccount account = bankAccountRepository.findByIdAndSide(invitation.getId(), dto.getSide());
+				BankAccount account = bankAccountRepository.findByInvitationAndSide(invitation, dto.getSide());
 				account.updateBankAccount(
 					dto.getSide(),
 					dto.getAccountNumber(),

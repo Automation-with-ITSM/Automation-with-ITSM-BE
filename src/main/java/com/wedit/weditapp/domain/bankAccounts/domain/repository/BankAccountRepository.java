@@ -10,5 +10,5 @@ import com.wedit.weditapp.domain.shared.AccountSide;
 public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
 	List<BankAccount> findByInvitation(Invitation invitation);
 
-	BankAccount findByIdAndSide(Long id, AccountSide side);
+	BankAccount findByInvitationAndSide(Invitation invitation, AccountSide side);
 }
