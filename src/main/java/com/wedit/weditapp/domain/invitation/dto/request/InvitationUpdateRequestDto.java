@@ -1,6 +1,7 @@
 package com.wedit.weditapp.domain.invitation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -32,7 +33,7 @@ public class InvitationUpdateRequestDto {
 
     private String extraAddress; // 상세 주소
 
-    @NotBlank(message = "date cannot be blank")
+    @NotNull(message = "date cannot be null")
     private LocalDate date; // 결혼식 날짜
 
     private Theme theme; // 테마

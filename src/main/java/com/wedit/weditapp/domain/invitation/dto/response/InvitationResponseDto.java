@@ -6,6 +6,7 @@ import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.Theme;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class InvitationResponseDto {
-    @NotBlank(message = "groom cannot be blank")
     private String groom; // 신랑 이름
 
-    @NotBlank(message = "bride cannot be blank")
     private String bride; // 신부 이름
 
     private String groomF; // 신랑 아버지 이름
@@ -30,15 +29,12 @@ public class InvitationResponseDto {
 
     private String brideM; // 신부 어머니 이름
 
-    @NotBlank(message = "address cannot be blank")
     private String address; // 주소
 
     private String extraAddress; // 상세 주소
 
-    @NotBlank(message = "date cannot be blank")
     private LocalDate date; // 결혼식 날짜
 
-    @NotBlank(message = "theme cannot be blank")
     private Theme theme; // 테마
 
     private String distribution; // 청첩장 URL

@@ -55,4 +55,11 @@ public class BankAccount extends BaseTimeEntity {
             .build();
     }
 
+    public void updateBankAccount(AccountSide side, String accountNumber, String bankName, String accountHolder, Invitation invitation) {
+        this.side = side;
+        this.accountNumber = accountNumber;
+        this.bankName = bankName;
+        this.accountHolder = accountHolder;
+        this.invitation = invitation;
+    }
 }

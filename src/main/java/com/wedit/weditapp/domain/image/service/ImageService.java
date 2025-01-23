@@ -51,4 +51,21 @@ public class ImageService {
 			.map(ImageResponseDto::from) // entity -> DTO
 			.collect(Collectors.toList()); // 리스트로 수집
 	}
+
+	// 이미지 업데이트
+	public void updateImages(List<MultipartFile> newImages, Invitation invitation) {
+		if (newImages.size() != 4) {
+			throw new IllegalArgumentException("Exactly 4 images are required.");
+		}
+
+		// 기존 이미지 삭제
+		List<Image> existingImages = imageRepository.findByInvitation(invitation);
+		existingImages.forEach(image -> {
+			s3Service.removeFile(image.getUrl()); // S3에서 파일 삭제
+			imageRepository.delete(image); // DB에서 이미지 삭제
+		});
+
+		// 새로운 이미지 업로드 및 저장
+		saveImages(newImages, invitation);
+	}
 }
