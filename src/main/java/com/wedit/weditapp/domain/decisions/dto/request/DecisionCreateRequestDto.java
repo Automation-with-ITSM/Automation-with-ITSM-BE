@@ -1,16 +1,14 @@
 package com.wedit.weditapp.domain.decisions.dto.request;
 
-import com.wedit.weditapp.domain.decisions.domain.Decisions;
 import com.wedit.weditapp.domain.shared.DecisionSide;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class DecisionCreateRequestDTO {
+public class DecisionCreateRequestDto {
 
     @NotBlank(message = "이름은 필수입니다.")
     private String name;

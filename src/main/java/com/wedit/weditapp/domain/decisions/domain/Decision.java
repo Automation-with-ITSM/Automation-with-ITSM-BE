@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "decisions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Decisions extends BaseTimeEntity {
+public class Decision extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,15 +38,15 @@ public class Decisions extends BaseTimeEntity {
 
 
     @Builder
-    private Decisions(String name, String phoneNumber, Integer addPerson, DecisionSide side){
+    private Decision(String name, String phoneNumber, Integer addPerson, DecisionSide side){
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.addPerson = addPerson;
         this.side = side;
     }
 
-    public static Decisions createDecision(String name, String phoneNumber, Integer addPerson, DecisionSide side){
-        return Decisions.builder()
+    public static Decision createDecision(String name, String phoneNumber, Integer addPerson, DecisionSide side){
+        return Decision.builder()
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .addPerson(addPerson)

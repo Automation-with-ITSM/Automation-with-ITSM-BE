@@ -1,6 +1,6 @@
 package com.wedit.weditapp.domain.bankAccounts.dto;
 
-import com.wedit.weditapp.domain.bankAccounts.domain.BankAccounts;
+import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
 import com.wedit.weditapp.domain.shared.AccountSide;
 
 import jakarta.validation.constraints.NotBlank;
@@ -31,7 +31,7 @@ public class BankAccountDTO {
 		this.accountHolder = accountHolder;
 	}
 
-	public static BankAccountDTO from(BankAccounts bankAccount) {
+	public static BankAccountDTO from(BankAccount bankAccount) {
 		return BankAccountDTO.builder()
 			.side(bankAccount.getSide())
 			.accountNumber(bankAccount.getAccountNumber())

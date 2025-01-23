@@ -1,10 +1,10 @@
 package com.wedit.weditapp.domain.comments.service;
 
-import com.wedit.weditapp.domain.comments.domain.Comments;
+import com.wedit.weditapp.domain.comments.domain.Comment;
 import com.wedit.weditapp.domain.comments.domain.repository.CommentRepository;
-import com.wedit.weditapp.domain.comments.dto.request.CommentCreateRequestDTO;
-import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDTO;
-import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDTO;
+import com.wedit.weditapp.domain.comments.dto.request.CommentCreateRequestDto;
+import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDto;
+import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
 import com.wedit.weditapp.global.error.ErrorCode;
@@ -17,9 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -30,7 +27,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final InvitationRepository invitationRepository;
 
-    public PagedCommentResponseDTO findAllCommentsByInvitationId(Long invitationId, int page){
+    public PagedCommentResponseDto findAllCommentsByInvitationId(Long invitationId, int page){
 
 //        boolean existsInvitation = invitationRepository.existById(invitationId);
 //        if(!existsInvitation){
@@ -43,29 +40,29 @@ public class CommentService {
 
 
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdAt").descending());
-        Page<Comments> commentPage = commentRepository.findByInvitationId(invitationId, pageable);
+        Page<Comment> commentPage = commentRepository.findByInvitationId(invitationId, pageable);
 
         if(commentPage.isEmpty()){
             throw new CommonException(ErrorCode.NO_MORE_COMMENTS);
         }
 
         // Comments 엔티티 -> DTO로 변환
-        Page<CommentResponseDTO> commentDTOPage = commentPage.map(CommentResponseDTO::from);
+        Page<CommentResponseDto> commentDTOPage = commentPage.map(CommentResponseDto::from);
 
         // 필요한 정보만으로 DTO 생성
-        return PagedCommentResponseDTO.of(commentDTOPage, commentPage.isLast(), page);
+        return PagedCommentResponseDto.of(commentDTOPage, commentPage.isLast(), page);
 
 
     }
 
     // 방명록 등록
-    public Comments createComment(CommentCreateRequestDTO commentCreateRequestDTO) {
+    public Comment createComment(CommentCreateRequestDto commentCreateRequestDTO) {
 
         Invitation invitation = invitationRepository.findById(commentCreateRequestDTO.getInvitationId())
                 .orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 
-        Comments comment = Comments.createComment(
+        Comment comment = Comment.createComment(
                 commentCreateRequestDTO.getName(),
                 commentCreateRequestDTO.getContent(),
                 invitation

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "comments")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Comments extends BaseTimeEntity {
+public class Comment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,14 +29,14 @@ public class Comments extends BaseTimeEntity {
     private Invitation invitation;
 
     @Builder
-    private Comments(String name, String content, Invitation invitation){
+    private Comment(String name, String content, Invitation invitation){
         this.name = name;
         this.content = content;
         this.invitation = invitation;
     }
 
-    public static Comments createComment(String name, String content, Invitation invitation){
-        return Comments.builder()
+    public static Comment createComment(String name, String content, Invitation invitation){
+        return Comment.builder()
                 .name(name)
                 .content(content)
                 .invitation(invitation)

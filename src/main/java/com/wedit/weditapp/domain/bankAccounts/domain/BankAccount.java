@@ -10,10 +10,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "bankAccounts")
+@Table(name = "bank_account")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BankAccounts extends BaseTimeEntity {
+public class BankAccount extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +37,7 @@ public class BankAccounts extends BaseTimeEntity {
     private Invitation invitation;
 
     @Builder
-    private BankAccounts(AccountSide side, String accountNumber, String bankName, String accountHolder, Invitation invitation) {
+    private BankAccount(AccountSide side, String accountNumber, String bankName, String accountHolder, Invitation invitation) {
         this.side = side;
         this.accountNumber = accountNumber;
         this.bankName = bankName;
@@ -45,8 +45,8 @@ public class BankAccounts extends BaseTimeEntity {
         this.invitation = invitation;
     }
 
-    public static BankAccounts createBankAccount(AccountSide side, String accountNumber, String bankName, String accountHolder, Invitation invitation) {
-        return BankAccounts.builder()
+    public static BankAccount createBankAccount(AccountSide side, String accountNumber, String bankName, String accountHolder, Invitation invitation) {
+        return BankAccount.builder()
             .side(side)
             .accountNumber(accountNumber)
             .bankName(bankName)

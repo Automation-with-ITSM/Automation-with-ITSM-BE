@@ -1,9 +1,9 @@
 package com.wedit.weditapp.domain.comments.controller;
 
-import com.wedit.weditapp.domain.comments.domain.Comments;
-import com.wedit.weditapp.domain.comments.dto.request.CommentCreateRequestDTO;
-import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDTO;
-import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDTO;
+import com.wedit.weditapp.domain.comments.domain.Comment;
+import com.wedit.weditapp.domain.comments.dto.request.CommentCreateRequestDto;
+import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDto;
+import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDto;
 import com.wedit.weditapp.domain.comments.service.CommentService;
 import com.wedit.weditapp.global.response.GlobalResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,12 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -33,11 +30,11 @@ public class CommentController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @GetMapping("/{invitationId}")
-    public ResponseEntity<GlobalResponseDto<PagedCommentResponseDTO>> findAllComments(
+    public ResponseEntity<GlobalResponseDto<PagedCommentResponseDto>> findAllComments(
             @PathVariable Long invitationId,
             @RequestParam(defaultValue = "1") int page){
 
-        PagedCommentResponseDTO response = commentService.findAllCommentsByInvitationId(invitationId, page);
+        PagedCommentResponseDto response = commentService.findAllCommentsByInvitationId(invitationId, page);
         return ResponseEntity.status(HttpStatus.OK).body(GlobalResponseDto.success(response));
     }
 
@@ -49,11 +46,11 @@ public class CommentController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     @PostMapping
-    public ResponseEntity<GlobalResponseDto<CommentResponseDTO>> createComment(
-            @Valid @RequestBody CommentCreateRequestDTO commentCreateRequestDTO) {
-        Comments createdComment = commentService.createComment(commentCreateRequestDTO);
-        CommentResponseDTO response = CommentResponseDTO.from(createdComment);
+    public ResponseEntity<GlobalResponseDto<CommentResponseDto>> createComment(
+            @Valid @RequestBody CommentCreateRequestDto commentCreateRequestDTO) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(GlobalResponseDto.success(response));
+        commentService.createComment(commentCreateRequestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(GlobalResponseDto.success());
     }
 }
