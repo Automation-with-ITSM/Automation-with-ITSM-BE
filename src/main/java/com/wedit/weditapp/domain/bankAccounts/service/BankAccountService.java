@@ -9,6 +9,8 @@ import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
 import com.wedit.weditapp.domain.bankAccounts.domain.repository.BankAccountRepository;
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
+import com.wedit.weditapp.global.error.ErrorCode;
+import com.wedit.weditapp.global.error.exception.CommonException;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +42,25 @@ public class BankAccountService {
 		return bankAccounts.stream() // 스트림 생성
 			.map(BankAccountDto::from) // entity -> DTO
 			.collect(Collectors.toList()); // 리스트로 수집
+	}
+
+	// 계좌 정보 수정
+	public void updateBankAccount(List<BankAccountDto> bankAccountDtos, Invitation invitation) {
+
+		List<BankAccount> bankAccounts = bankAccountDtos.stream()
+			.map(dto -> {
+				BankAccount account = bankAccountRepository.findByIdAndSide(invitation.getId(), dto.getSide());
+				account.updateBankAccount(
+					dto.getSide(),
+					dto.getAccountNumber(),
+					dto.getBankName(),
+					dto.getAccountHolder(),
+					invitation);
+				return account;
+			})
+			.collect(Collectors.toList());
+
+		// 수정된 계좌 정보 저장
+		bankAccountRepository.saveAll(bankAccounts);
 	}
 }
