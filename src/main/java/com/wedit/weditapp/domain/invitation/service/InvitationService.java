@@ -12,6 +12,7 @@ import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
 import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestDto;
+import com.wedit.weditapp.domain.invitation.dto.request.InvitationUpdateRequestDto;
 import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDto;
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
@@ -75,6 +76,39 @@ public class InvitationService {
 		List<ImageResponseDto> images = imageService.getImages(invitation);
 
 		return InvitationResponseDto.from(invitation, bankAccounts, images);
+	}
+
+	public void updateInvitation(Long invitationId, InvitationUpdateRequestDto updateRequest, List<MultipartFile> newImages) {
+		Invitation invitation = invitationRepository.findById(invitationId)
+			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		// 청첩장 정보 업데이트
+		invitation.updateInvitation(
+			updateRequest.getGroom(),
+			updateRequest.getBride(),
+			updateRequest.getGroomF(),
+			updateRequest.getGroomM(),
+			updateRequest.getBrideF(),
+			updateRequest.getBrideM(),
+			updateRequest.getAddress(),
+			updateRequest.getExtraAddress(),
+			updateRequest.getDate(),
+			updateRequest.getTheme(),
+			updateRequest.getDistribution(),
+			updateRequest.isGuestBookOption(),
+			updateRequest.isDecisionOption(),
+			updateRequest.isAccountOption()
+		);
+
+		// 계좌 정보 업데이트
+		if (updateRequest.isAccountOption() && updateRequest.getBankAccounts() != null) {
+			bankAccountService.updateBankAccount(updateRequest.getBankAccounts(), invitation);
+		}
+
+		// 이미지 정보 업데이트
+		if (newImages != null && !newImages.isEmpty()) {
+			imageService.updateImages(newImages, invitation);
+		}
 	}
 
 	private Member getMember(Long memberId) {
