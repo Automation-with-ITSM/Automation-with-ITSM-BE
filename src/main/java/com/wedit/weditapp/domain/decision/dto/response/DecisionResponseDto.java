@@ -1,6 +1,6 @@
-package com.wedit.weditapp.domain.decisions.dto.response;
+package com.wedit.weditapp.domain.decision.dto.response;
 
-import com.wedit.weditapp.domain.decisions.domain.Decision;
+import com.wedit.weditapp.domain.decision.domain.Decision;
 import com.wedit.weditapp.domain.shared.DecisionSide;
 import lombok.Builder;
 import lombok.Getter;

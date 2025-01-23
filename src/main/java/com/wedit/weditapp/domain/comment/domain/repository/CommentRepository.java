@@ -1,6 +1,6 @@
-package com.wedit.weditapp.domain.comments.domain.repository;
+package com.wedit.weditapp.domain.comment.domain.repository;
 
-import com.wedit.weditapp.domain.comments.domain.Comment;
+import com.wedit.weditapp.domain.comment.domain.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

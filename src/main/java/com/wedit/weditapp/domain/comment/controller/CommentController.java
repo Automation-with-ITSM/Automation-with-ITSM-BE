@@ -1,10 +1,9 @@
-package com.wedit.weditapp.domain.comments.controller;
+package com.wedit.weditapp.domain.comment.controller;
 
-import com.wedit.weditapp.domain.comments.domain.Comment;
-import com.wedit.weditapp.domain.comments.dto.request.CommentCreateRequestDto;
-import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDto;
-import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDto;
-import com.wedit.weditapp.domain.comments.service.CommentService;
+import com.wedit.weditapp.domain.comment.dto.request.CommentCreateRequestDto;
+import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
+import com.wedit.weditapp.domain.comment.dto.response.PagedCommentResponseDto;
+import com.wedit.weditapp.domain.comment.service.CommentService;
 import com.wedit.weditapp.global.response.GlobalResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.comments.domain;
+package com.wedit.weditapp.domain.comment.domain;
 
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.BaseTimeEntity;

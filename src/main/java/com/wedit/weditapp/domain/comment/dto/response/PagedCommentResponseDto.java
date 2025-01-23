@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.comments.dto.response;
+package com.wedit.weditapp.domain.comment.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

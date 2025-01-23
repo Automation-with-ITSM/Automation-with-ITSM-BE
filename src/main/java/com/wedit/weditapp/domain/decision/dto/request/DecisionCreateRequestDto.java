@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.decisions.dto.request;
+package com.wedit.weditapp.domain.decision.dto.request;
 
 import com.wedit.weditapp.domain.shared.DecisionSide;
 import jakarta.validation.constraints.NotBlank;
@@ -21,4 +21,7 @@ public class DecisionCreateRequestDto {
 
     @NotNull(message = "신랑측인지 신부측인지 선택해주세요.")
     private DecisionSide side;
+
+    @NotNull(message = "청첩장 ID는 필수입니다.")
+    private Long invitationId;
 }
