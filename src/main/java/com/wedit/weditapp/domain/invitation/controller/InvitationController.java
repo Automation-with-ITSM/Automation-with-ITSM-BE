@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestDto;
 
+import com.wedit.weditapp.domain.invitation.dto.request.InvitationUpdateRequestDto;
 import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDto;
 import com.wedit.weditapp.domain.invitation.service.InvitationService;
 import com.wedit.weditapp.global.response.GlobalResponseDto;
@@ -47,5 +49,17 @@ public class InvitationController {
 		@PathVariable Long invitationId){
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(invitationService.getInvitation(invitationId)));
+	}
+
+
+	@PatchMapping(path = "/{invitationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(summary = "청첩장 수정", description = "청첩장 정보 및 이미지를 수정")
+	public ResponseEntity<GlobalResponseDto<Void>> updateInvitation(
+		@PathVariable Long invitationId,
+		@RequestPart("images") List<MultipartFile> newImages,
+		@Valid @RequestPart("content") InvitationUpdateRequestDto updateRequest) {
+		invitationService.updateInvitation(invitationId, updateRequest, newImages);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT)
+			.body(GlobalResponseDto.success());
 	}
 }
