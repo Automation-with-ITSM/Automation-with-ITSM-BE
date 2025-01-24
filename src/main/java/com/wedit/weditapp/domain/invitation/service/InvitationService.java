@@ -40,6 +40,7 @@ public class InvitationService {
 	// 청첩장 정보 등록 -> 생성
 	public Void createInvitation(UserDetails userDetails, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(userDetails);
+
 		// Invitation 생성
 		Invitation invitation = Invitation.createInvitation(
 			member,
