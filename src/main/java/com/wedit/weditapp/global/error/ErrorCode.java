@@ -48,7 +48,6 @@ public enum ErrorCode {
 	IMAGE_UPLOAD_FAILED(500, "IMAGE_UPLOAD_FAILED", "이미지 업로드에 실패했습니다."),
 	IMAGE_COUNT_INVALID(400, "IMAGE_COUNT_INVALID", "이미지는 정확히 4개가 필요합니다.");
 
-
 	private final int status;
 	private final String code;
 	private final String message;
