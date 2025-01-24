@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +42,6 @@ public class InvitationController {
 		@Valid @RequestPart("content") InvitationCreateRequestDto request,
 		@AuthenticationPrincipal UserDetails userDetail) {
 
-
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(GlobalResponseDto.success(invitationService.createInvitation(userDetail, request, images)));
 	}
@@ -50,9 +50,10 @@ public class InvitationController {
 	@Operation(summary = "청첩장 조회", description = "특정 청첩장 상세 정보 조회")
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitation(
 		@PathVariable Long invitationId,
+		@RequestParam(defaultValue = "1") int page, // 기본 페이지는 1
 		@AuthenticationPrincipal UserDetails userDetail){
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(invitationService.getInvitation(userDetail, invitationId)));
+			.body(GlobalResponseDto.success(invitationService.getInvitation(userDetail, invitationId, page)));
 	}
 
 	@PatchMapping(path = "/{invitationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -90,8 +91,9 @@ public class InvitationController {
 	@GetMapping("/guest/{uniqueId}")
 	@Operation(summary = "비회원 청첩장 조회", description = "UUID 기반으로 청첩장 조회")
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitationForGuest(
-		@PathVariable String uniqueId) {
-		InvitationResponseDto response = invitationService.getInvitationForGuest(uniqueId);
+		@PathVariable String uniqueId,
+		@RequestParam(defaultValue = "1") int page) { // 기본 페이지는 1
+		InvitationResponseDto response = invitationService.getInvitationForGuest(uniqueId, page);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(response));
 	}

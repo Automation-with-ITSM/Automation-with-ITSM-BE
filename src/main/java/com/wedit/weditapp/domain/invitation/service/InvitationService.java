@@ -9,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
+import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
+import com.wedit.weditapp.domain.comment.dto.response.PagedCommentResponseDto;
 import com.wedit.weditapp.domain.comment.service.CommentService;
 import com.wedit.weditapp.domain.decision.service.DecisionService;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
@@ -74,7 +76,7 @@ public class InvitationService {
 	}
 
 	// 청첩장 조회
-	public InvitationResponseDto getInvitation(UserDetails userDetails, Long invitationId) {
+	public InvitationResponseDto getInvitation(UserDetails userDetails, Long invitationId, int page) {
 		Member member = getMember(userDetails);
 
 		// 초대장 조회
@@ -83,8 +85,9 @@ public class InvitationService {
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
 		List<ImageResponseDto> images = imageService.getImages(invitation);
+		PagedCommentResponseDto comments = commentService.findAllCommentsByInvitationId(invitationId, page);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images);
+		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.getComments());
 	}
 
 	// 청첩장 수정
@@ -182,15 +185,16 @@ public class InvitationService {
 	}
 
 	// 비회원 청첩장 조회
-	public InvitationResponseDto getInvitationForGuest(String uniqueId) {
+	public InvitationResponseDto getInvitationForGuest(String uniqueId, int page) {
 		// UUID 기반으로 청첩장 조회
 		Invitation invitation = invitationRepository.findByUniqueId(uniqueId)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
 		List<ImageResponseDto> images = imageService.getImages(invitation);
+		PagedCommentResponseDto comments = commentService.findAllCommentsByInvitationId(invitation.getId(), page);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images);
+		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.getComments());
 	}
 
 	// 멤버 찾기
