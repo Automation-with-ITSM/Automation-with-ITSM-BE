@@ -3,11 +3,14 @@ package com.wedit.weditapp.domain.invitation.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
+import com.wedit.weditapp.domain.comments.domain.Comment;
+import com.wedit.weditapp.domain.comments.domain.repository.CommentRepository;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
@@ -31,6 +34,7 @@ public class InvitationService {
 	private final ImageService imageService;
 	private final MemberRepository memberRepository;
 	private final BankAccountService bankAccountService;
+	private final CommentRepository commentRepository;
 
 	public Void createInvitation(Long memberId, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(memberId);
@@ -134,5 +138,26 @@ public class InvitationService {
 		}
 
 		return invitation.getDistribution();
+	}
+
+	public void deleteInvitation(Long invitationId) {
+		// 청첩장 조회
+		Invitation invitation = invitationRepository.findById(invitationId)
+			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		// 1. BankAccount 삭제
+		bankAccountService.deleteBankAccount(invitation);
+
+		// 2. Image 삭제
+		imageService.deleteImages(invitation);
+
+		// 3. Comment 삭제
+		List<Comment> comments = commentRepository.findByInvitationId(invitationId, Pageable.unpaged()).getContent();
+		if (!comments.isEmpty()) {
+			commentRepository.deleteAll(comments);
+		}
+
+		// 4. Invitation 삭제
+		invitationRepository.delete(invitation);
 	}
 }

@@ -76,4 +76,12 @@ public class BankAccountService {
 		// 수정된 계좌 정보 저장
 		bankAccountRepository.saveAll(updatedAccounts);
 	}
+
+	// BankAccount 삭제
+	public void deleteBankAccount(Invitation invitation) {
+		List<BankAccount> bankAccounts = bankAccountRepository.findByInvitation(invitation);
+		if (!bankAccounts.isEmpty()) {
+			bankAccountRepository.deleteAll(bankAccounts);
+		}
+	}
 }

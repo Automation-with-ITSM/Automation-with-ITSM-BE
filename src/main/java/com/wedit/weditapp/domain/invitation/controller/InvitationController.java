@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,5 +70,13 @@ public class InvitationController {
 		String url = invitationService.generateAndSaveInvitationUrl(invitationId);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(url));
+	}
+
+	@DeleteMapping("/{invitationId}")
+	@Operation(summary = "청첩장 삭제", description = "청첩장 및 관련 데이터 삭제")
+	public ResponseEntity<GlobalResponseDto<Void>> deleteInvitation(@PathVariable Long invitationId) {
+		invitationService.deleteInvitation(invitationId); // 서비스 호출
+		return ResponseEntity.status(HttpStatus.OK) // HTTP 204 No Content
+			.body(GlobalResponseDto.success());
 	}
 }
