@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
 import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestDto;
 
 import com.wedit.weditapp.domain.invitation.dto.request.InvitationUpdateRequestDto;
@@ -81,11 +80,11 @@ public class InvitationController {
 			.body(GlobalResponseDto.success());
 	}
 
-	@GetMapping("/guest/{uuid}")
+	@GetMapping("/guest/{uniqueId}")
 	@Operation(summary = "비회원 청첩장 조회", description = "UUID 기반으로 청첩장 조회")
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitationForGuest(
-		@PathVariable String uuid) {
-		InvitationResponseDto response = invitationService.getInvitationForGuest(uuid);
+		@PathVariable String uniqueId) {
+		InvitationResponseDto response = invitationService.getInvitationForGuest(uniqueId);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(response));
 	}

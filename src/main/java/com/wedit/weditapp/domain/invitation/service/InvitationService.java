@@ -176,9 +176,9 @@ public class InvitationService {
 	}
 
 	// 비회원 청첩장 조회
-	public InvitationResponseDto getInvitationForGuest(String uuid) {
+	public InvitationResponseDto getInvitationForGuest(String uniqueId) {
 		// UUID 기반으로 청첩장 조회
-		Invitation invitation = invitationRepository.findByUuid(uuid)
+		Invitation invitation = invitationRepository.findByUniqueId(uniqueId)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
