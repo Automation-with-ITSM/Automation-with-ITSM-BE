@@ -47,7 +47,6 @@ public class InvitationService {
 			invitationRequest.getExtraAddress(),
 			invitationRequest.getDate(),
 			invitationRequest.getTheme(),
-			invitationRequest.getDistribution(),
 			invitationRequest.isGuestBookOption(),
 			invitationRequest.isDecisionOption(),
 			invitationRequest.isAccountOption()
@@ -95,7 +94,6 @@ public class InvitationService {
 			updateRequest.getExtraAddress(),
 			updateRequest.getDate(),
 			updateRequest.getTheme(),
-			updateRequest.getDistribution(),
 			updateRequest.isGuestBookOption(),
 			updateRequest.isDecisionOption(),
 			updateRequest.isAccountOption()

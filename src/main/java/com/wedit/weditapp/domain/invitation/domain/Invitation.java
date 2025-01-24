@@ -72,7 +72,7 @@ public class Invitation extends BaseTimeEntity {
     private boolean accountOption; // 계좌 정보 공개 여부
 
     @Builder
-    private Invitation(String uuid,Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
+    private Invitation(String uuid,Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
         // 필수 필드 검증
         if (member == null || groom == null || bride == null || address == null || date == null || theme == null) {
             throw new IllegalArgumentException("필수 필드 누락");
@@ -90,13 +90,12 @@ public class Invitation extends BaseTimeEntity {
         this.extraAddress = extraAddress;
         this.date = date;
         this.theme = theme;
-        this.distribution = distribution;
         this.guestBookOption = guestBookOption;
         this.decisionOption = decisionOption;
         this.accountOption = accountOption;
     }
 
-    public static Invitation createInvitation(Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
+    public static Invitation createInvitation(Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
         return Invitation.builder()
                 .member(member)
                 .groom(groom)
@@ -109,7 +108,6 @@ public class Invitation extends BaseTimeEntity {
                 .extraAddress(extraAddress)
                 .date(date)
                 .theme(theme)
-                .distribution(distribution)
                 .guestBookOption(guestBookOption)
                 .decisionOption(decisionOption)
                 .accountOption(accountOption)
@@ -128,7 +126,7 @@ public class Invitation extends BaseTimeEntity {
         this.accountOption = true;
     }
 
-    public void updateInvitation(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
+    public void updateInvitation(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
         if (member == null || groom == null || bride == null || address == null || date == null || theme == null) {
             throw new IllegalArgumentException("필수 필드 누락");
         }
@@ -143,7 +141,6 @@ public class Invitation extends BaseTimeEntity {
         this.extraAddress = extraAddress;
         this.date = date;
         this.theme = theme;
-        this.distribution = distribution;
         this.guestBookOption = guestBookOption;
         this.decisionOption = decisionOption;
         this.accountOption = accountOption;
