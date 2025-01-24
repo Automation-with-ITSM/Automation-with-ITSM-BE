@@ -12,7 +12,4 @@ import org.springframework.data.repository.query.Param;
 public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
 	List<BankAccount> findByInvitation(Invitation invitation);
 
-	@Modifying
-	@Query("DELETE FROM BankAccount b WHERE b.invitation.id = :invitationId")
-	void deleteAllByInvitationId(@Param("invitationId") Long invitationId);
 }

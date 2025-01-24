@@ -14,7 +14,4 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 	// 특정 Invitation의 모든 이미지를 location 순서대로 조회
 	List<Image> findByInvitation(Invitation invitation);
 
-	@Modifying
-	@Query("DELETE FROM Image i WHERE i.invitation.id = :invitationId")
-	void deleteAllByInvitationId(@Param("invitationId") Long invitationId);
 }

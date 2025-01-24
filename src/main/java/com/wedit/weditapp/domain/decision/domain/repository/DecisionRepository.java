@@ -19,8 +19,4 @@ public interface DecisionRepository extends JpaRepository<Decision, Long> {
     @Query("SELECT count(d) FROM Decision d WHERE d.invitation.id = :invitationId AND d.side = 'BRIDE'")
     Integer getBrideDecisionCount(@Param("invitationId") Long invitationId);
 
-    @Modifying
-    @Query("DELETE FROM Decision d WHERE d.invitation.id = :invitationId")
-    void deleteAllByInvitationId(@Param("invitationId") Long invitationId);
-
 }

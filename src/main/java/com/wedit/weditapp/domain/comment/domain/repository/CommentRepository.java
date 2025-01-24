@@ -12,7 +12,4 @@ import org.springframework.data.repository.query.Param;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByInvitationId(Long invitationId, Pageable pageable);
 
-    @Modifying
-    @Query("DELETE FROM Comment c WHERE c.invitation.id = :invitationId")
-    void deleteAllByInvitationId(@Param("invitationId") Long invitationId);
 }
