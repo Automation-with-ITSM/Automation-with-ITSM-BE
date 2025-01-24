@@ -12,6 +12,8 @@ import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
 import com.wedit.weditapp.domain.comment.domain.Comment;
 import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
+import com.wedit.weditapp.domain.decision.domain.Decision;
+import com.wedit.weditapp.domain.decision.domain.repository.DecisionRepository;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
@@ -36,6 +38,7 @@ public class InvitationService {
 	private final MemberRepository memberRepository;
 	private final BankAccountService bankAccountService;
 	private final CommentRepository commentRepository;
+	private final DecisionRepository decisionRepository;
 
 	public Void createInvitation(Long memberId, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(memberId);
@@ -158,7 +161,13 @@ public class InvitationService {
 			commentRepository.deleteAll(comments);
 		}
 
-		// 4. Invitation 삭제
+		// 4. Decision 삭제
+		List<Decision> decisions = decisionRepository.findByInvitationId(invitationId);
+		if (!decisions.isEmpty()) {
+			decisionRepository.deleteAll(decisions);
+		}
+
+		// 5. Invitation 삭제
 		invitationRepository.delete(invitation);
 	}
 }
