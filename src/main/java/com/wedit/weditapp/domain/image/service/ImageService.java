@@ -11,6 +11,8 @@ import com.wedit.weditapp.domain.image.domain.repository.ImageRepository;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.S3Service;
+import com.wedit.weditapp.global.error.ErrorCode;
+import com.wedit.weditapp.global.error.exception.CommonException;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +26,19 @@ public class ImageService {
 
 	// S3에 이미지를 업로드하고 URL을 반환하며, DB에 저장
 	public void saveImages(List<MultipartFile> images, Invitation invitation) {
-		if (images.size() != 4) {
-			throw new IllegalArgumentException("Exactly 4 images are required.");
+		// 이미지 리스트가 null인지 확인
+		if (images == null || images.size() != 4) {
+			throw new CommonException(ErrorCode.INVALID_INPUT_VALUE);
 		}
 
 		int location = 1; // 이미지 위치 인덱스
 		for (MultipartFile image : images) {
-			String imageUrl = s3Service.upload(image); // S3 업로드 후 URL 반환
+			String imageUrl;
+			try {
+				imageUrl = s3Service.upload(image); // S3 업로드 후 URL 반환
+			} catch (Exception e) {
+				throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAILED);
+			}
 
 			// 이미지 엔티티 생성 및 저장
 			Image imageEntity = Image.builder()
@@ -54,14 +62,19 @@ public class ImageService {
 
 	// 이미지 업데이트
 	public void updateImages(List<MultipartFile> newImages, Invitation invitation) {
-		if (newImages.size() != 4) {
-			throw new IllegalArgumentException("Exactly 4 images are required.");
+		// 새로운 이미지 리스트가 null인지 확인
+		if (newImages == null || newImages.size() != 4) {
+			throw new CommonException(ErrorCode.INVALID_INPUT_VALUE);
 		}
 
 		// 기존 이미지 삭제
 		List<Image> existingImages = imageRepository.findByInvitation(invitation);
 		existingImages.forEach(image -> {
-			s3Service.removeFile(image.getUrl()); // S3에서 파일 삭제
+			try {
+				s3Service.removeFile(image.getUrl()); // S3에서 파일 삭제
+			} catch (Exception e) {
+				throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAILED);
+			}
 			imageRepository.delete(image); // DB에서 이미지 삭제
 		});
 
@@ -75,10 +88,15 @@ public class ImageService {
 		List<Image> images = imageRepository.findByInvitation(invitation);
 
 		// S3에서 이미지 삭제 및 DB에서 데이터 삭제
-		if (!images.isEmpty()) {
-			images.forEach(image -> {
+		images.forEach(image -> {
+			try {
 				s3Service.removeFile(image.getUrl()); // S3에서 삭제
-			});
+			} catch (Exception e) {
+				throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAILED);
+			}
+		});
+
+		if (!images.isEmpty()) {
 			imageRepository.deleteAll(images); // DB에서 이미지 삭제
 		}
 	}

@@ -39,10 +39,14 @@ public enum ErrorCode {
 
 	// 청첩장
 	INVITATION_NOT_FOUND(404, "INVITATION_NOT_FOUND", "청첩장을 찾을 수 없습니다."),
-	IMAGE_UPLOAD_FAILED(500, "IMAGE_UPLOAD_FAILED", "이미지 업로드에 실패하였습니다."),
 	INVALID_INVITATION_ID(400, "INVALID_INVITATION_ID", "잘못된 청첩장 id 입니다."),
 
-	BANK_ACCOUNT_EMPTY(400, "BANK_ACCOUNT_EMPTY", "계좌 정보가 비어 있습니다.");
+	// 계좌
+	BANK_ACCOUNT_EMPTY(400, "BANK_ACCOUNT_EMPTY", "계좌 정보가 비어 있습니다."),
+
+	// 이미지
+	IMAGE_UPLOAD_FAILED(500, "IMAGE_UPLOAD_FAILED", "이미지 업로드에 실패했습니다."),
+	IMAGE_COUNT_INVALID(400, "IMAGE_COUNT_INVALID", "이미지는 정확히 4개가 필요합니다.");
 
 
 	private final int status;
