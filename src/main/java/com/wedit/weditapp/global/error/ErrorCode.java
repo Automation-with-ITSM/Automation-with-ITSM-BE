@@ -41,7 +41,8 @@ public enum ErrorCode {
 	INVITATION_NOT_FOUND(404, "INVITATION_NOT_FOUND", "청첩장을 찾을 수 없습니다."),
 	INVALID_INVITATION_DATE(400, "INVALID_INVITATION_DATE", "유효하지 않은 날짜입니다."),
 	ACCOUNT_OPTION_REQUIRED(400, "ACCOUNT_OPTION_REQUIRED", "계좌 옵션이 활성화되어야 합니다."),
-	IMAGE_UPLOAD_FAILED(500, "IMAGE_UPLOAD_FAILED", "이미지 업로드에 실패하였습니다.");
+	IMAGE_UPLOAD_FAILED(500, "IMAGE_UPLOAD_FAILED", "이미지 업로드에 실패하였습니다."),
+	INVALID_INVITATION_ID(400, "INVALID_INVITATION_ID", "잘못된 청첩장 id 입니다.");
 
 	private final int status;
 	private final String code;

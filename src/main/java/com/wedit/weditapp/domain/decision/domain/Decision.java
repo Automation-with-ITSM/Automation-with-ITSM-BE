@@ -32,7 +32,7 @@ public class Decision extends BaseTimeEntity {
     @Column(name = "side", nullable = false)
     private DecisionSide side;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "invitation_id", nullable = false)
     private Invitation invitation;
 

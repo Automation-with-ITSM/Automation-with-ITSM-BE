@@ -2,6 +2,10 @@ package com.wedit.weditapp.domain.invitation.service;
 
 import java.util.List;
 
+import com.wedit.weditapp.domain.bankAccounts.domain.repository.BankAccountRepository;
+import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
+import com.wedit.weditapp.domain.decision.domain.repository.DecisionRepository;
+import com.wedit.weditapp.domain.image.domain.repository.ImageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +33,10 @@ public class InvitationService {
 	private final ImageService imageService;
 	private final MemberRepository memberRepository;
 	private final BankAccountService bankAccountService;
+	private final CommentRepository commentRepository;
+	private final DecisionRepository decisionRepository;
+	private final ImageRepository imageRepository;
+	private final BankAccountRepository bankAccountRepository;
 
 	public Void createInvitation(Long memberId, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(memberId);
@@ -80,5 +88,19 @@ public class InvitationService {
 	private Member getMember(Long memberId) {
 		return memberRepository.findById(memberId)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
+	}
+
+	// Invitation 삭제시 연관된 Comment, Decision, Image, BankAccount 삭제
+	private void deleteInvitation(Long invitationId){
+		// Invitation 유효성 검사
+		Invitation invitation = invitationRepository.findById(invitationId)
+				.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		commentRepository.deleteAllByInvitationId(invitationId);
+		decisionRepository.deleteAllByInvitationId(invitationId);
+		imageRepository.deleteAllByInvitationId(invitationId);
+		bankAccountRepository.deleteAllByInvitationId(invitationId);
+
+		invitationRepository.delete(invitation);
 	}
 }

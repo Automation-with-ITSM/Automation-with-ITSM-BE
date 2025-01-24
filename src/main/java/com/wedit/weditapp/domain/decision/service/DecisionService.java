@@ -25,7 +25,7 @@ public class DecisionService {
     public CountResponseDto getDecisionCounts(Long invitationId){
         // invitationId 유효성 검사
         if (invitationId == null || invitationId <= 0){
-            throw new CommonException(ErrorCode.INVALID_INPUT_VALUE);
+            throw new CommonException(ErrorCode.INVALID_INVITATION_ID);
         }
 
         Integer totalCount = decisionRepository.getTotalDecisionCount(invitationId);
