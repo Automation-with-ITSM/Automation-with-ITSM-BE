@@ -32,7 +32,7 @@ public class BankAccount extends BaseTimeEntity {
     @Column(nullable = false)
     private String accountHolder;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "invitation_id", nullable = false)
     private Invitation invitation;
 

@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.comments.dto.request;
+package com.wedit.weditapp.domain.comment.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

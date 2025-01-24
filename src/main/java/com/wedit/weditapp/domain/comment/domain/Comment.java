@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.comments.domain;
+package com.wedit.weditapp.domain.comment.domain;
 
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.BaseTimeEntity;
@@ -24,7 +24,7 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invitation_id", nullable = false)
     private Invitation invitation;
 

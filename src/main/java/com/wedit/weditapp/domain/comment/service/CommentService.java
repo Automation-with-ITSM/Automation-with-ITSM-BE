@@ -1,10 +1,10 @@
-package com.wedit.weditapp.domain.comments.service;
+package com.wedit.weditapp.domain.comment.service;
 
-import com.wedit.weditapp.domain.comments.domain.Comment;
-import com.wedit.weditapp.domain.comments.domain.repository.CommentRepository;
-import com.wedit.weditapp.domain.comments.dto.request.CommentCreateRequestDto;
-import com.wedit.weditapp.domain.comments.dto.response.CommentResponseDto;
-import com.wedit.weditapp.domain.comments.dto.response.PagedCommentResponseDto;
+import com.wedit.weditapp.domain.comment.domain.Comment;
+import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
+import com.wedit.weditapp.domain.comment.dto.request.CommentCreateRequestDto;
+import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
+import com.wedit.weditapp.domain.comment.dto.response.PagedCommentResponseDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.invitation.domain.repository.InvitationRepository;
 import com.wedit.weditapp.global.error.ErrorCode;

@@ -1,7 +1,8 @@
-package com.wedit.weditapp.domain.decisions.domain.repository;
+package com.wedit.weditapp.domain.decision.domain.repository;
 
-import com.wedit.weditapp.domain.decisions.domain.Decision;
+import com.wedit.weditapp.domain.decision.domain.Decision;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 

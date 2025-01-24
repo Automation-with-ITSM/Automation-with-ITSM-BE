@@ -1,6 +1,6 @@
-package com.wedit.weditapp.domain.comments.dto.response;
+package com.wedit.weditapp.domain.comment.dto.response;
 
-import com.wedit.weditapp.domain.comments.domain.Comment;
+import com.wedit.weditapp.domain.comment.domain.Comment;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

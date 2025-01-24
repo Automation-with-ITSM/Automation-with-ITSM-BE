@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.decisions.domain;
+package com.wedit.weditapp.domain.decision.domain;
 
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.BaseTimeEntity;
@@ -32,25 +32,27 @@ public class Decision extends BaseTimeEntity {
     @Column(name = "side", nullable = false)
     private DecisionSide side;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invitation_id", nullable = false)
     private Invitation invitation;
 
 
     @Builder
-    private Decision(String name, String phoneNumber, Integer addPerson, DecisionSide side){
+    private Decision(String name, String phoneNumber, Integer addPerson, DecisionSide side, Invitation invitation){
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.addPerson = addPerson;
         this.side = side;
+        this.invitation = invitation;
     }
 
-    public static Decision createDecision(String name, String phoneNumber, Integer addPerson, DecisionSide side){
+    public static Decision createDecision(String name, String phoneNumber, Integer addPerson, DecisionSide side, Invitation invitation){
         return Decision.builder()
                 .name(name)
                 .phoneNumber(phoneNumber)
                 .addPerson(addPerson)
                 .side(side)
+                .invitation(invitation)
                 .build();
     }
 }

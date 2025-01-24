@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.decisions.dto.response;
+package com.wedit.weditapp.domain.decision.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
