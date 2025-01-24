@@ -63,7 +63,7 @@ public class InvitationController {
 			.body(GlobalResponseDto.success());
 	}
 
-	@PostMapping("/{invitationId}/generate-url")
+	@PostMapping("/url/{invitationId}")
 	@Operation(summary = "청첩장 URL 생성", description = "UUID 기반 고유 URL 생성")
 	public ResponseEntity<GlobalResponseDto<String>> generateInvitationUrl(
 		@PathVariable Long invitationId) {
