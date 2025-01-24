@@ -40,6 +40,7 @@ public class InvitationService {
 	private final CommentRepository commentRepository;
 	private final DecisionRepository decisionRepository;
 
+	// 청첩장 정보 등록 -> 생성
 	public Void createInvitation(Long memberId, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(memberId);
 		// Invitation 생성
@@ -75,6 +76,7 @@ public class InvitationService {
 		//return InvitationResponseDTO.from(invitationRepository.save(invitation));
 	}
 
+	// 청첩장 조회
 	public InvitationResponseDto getInvitation(Long invitationId) {
 		// 초대장 조회
 		Invitation invitation  = invitationRepository.findById(invitationId)
@@ -86,6 +88,7 @@ public class InvitationService {
 		return InvitationResponseDto.from(invitation, bankAccounts, images);
 	}
 
+	// 청첩장 수정
 	public void updateInvitation(Long invitationId, InvitationUpdateRequestDto updateRequest, List<MultipartFile> newImages) {
 		Invitation invitation = invitationRepository.findById(invitationId)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
@@ -120,6 +123,7 @@ public class InvitationService {
 		//invitationRepository.save(invitation);
 	}
 
+	// 멤버 찾기
 	private Member getMember(Long memberId) {
 		return memberRepository.findById(memberId)
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
@@ -169,5 +173,17 @@ public class InvitationService {
 
 		// 5. Invitation 삭제
 		invitationRepository.delete(invitation);
+	}
+
+	// 비회원 청첩장 조회
+	public InvitationResponseDto getInvitationForGuest(String uuid) {
+		// UUID 기반으로 청첩장 조회
+		Invitation invitation = invitationRepository.findByUuid(uuid)
+			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
+		List<ImageResponseDto> images = imageService.getImages(invitation);
+
+		return InvitationResponseDto.from(invitation, bankAccounts, images);
 	}
 }
