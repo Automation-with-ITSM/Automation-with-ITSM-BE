@@ -79,4 +79,13 @@ public class InvitationController {
 		return ResponseEntity.status(HttpStatus.OK) // HTTP 204 No Content
 			.body(GlobalResponseDto.success());
 	}
+
+	@GetMapping("/guest/{uniqueId}")
+	@Operation(summary = "비회원 청첩장 조회", description = "UUID 기반으로 청첩장 조회")
+	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitationForGuest(
+		@PathVariable String uniqueId) {
+		InvitationResponseDto response = invitationService.getInvitationForGuest(uniqueId);
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(GlobalResponseDto.success(response));
+	}
 }
