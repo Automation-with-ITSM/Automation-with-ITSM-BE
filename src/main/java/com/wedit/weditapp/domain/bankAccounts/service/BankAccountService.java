@@ -46,6 +46,12 @@ public class BankAccountService {
 
 	// 계좌 정보 수정
 	public void updateBankAccount(List<BankAccountDto> bankAccountDtos, Invitation invitation) {
+		// 계좌 공개 옵션이 false라면 모든 계좌 삭제
+		if (!invitation.isAccountOption()) {
+			deleteBankAccount(invitation);
+			return;
+		}
+
 		List<BankAccount> updatedAccounts = bankAccountDtos.stream()
 			.map(dto -> {
 				BankAccount account = bankAccountRepository.findByInvitationAndSide(invitation, dto.getSide());
@@ -80,8 +86,11 @@ public class BankAccountService {
 	// BankAccount 삭제
 	public void deleteBankAccount(Invitation invitation) {
 		List<BankAccount> bankAccounts = bankAccountRepository.findByInvitation(invitation);
-		if (!bankAccounts.isEmpty()) {
-			bankAccountRepository.deleteAll(bankAccounts);
+
+		if (bankAccounts == null || bankAccounts.isEmpty()) {
+			return;
 		}
+
+		bankAccountRepository.deleteAll(bankAccounts);
 	}
 }

@@ -13,5 +13,4 @@ import org.springframework.data.repository.query.Param;
 public interface ImageRepository extends JpaRepository<Image, Long> {
 	// 특정 Invitation의 모든 이미지를 location 순서대로 조회
 	List<Image> findByInvitation(Invitation invitation);
-
 }

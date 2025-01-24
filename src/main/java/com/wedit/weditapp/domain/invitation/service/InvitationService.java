@@ -3,19 +3,14 @@ package com.wedit.weditapp.domain.invitation.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.domain.Pageable;
-
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
-import com.wedit.weditapp.domain.comment.domain.Comment;
-import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
-import com.wedit.weditapp.domain.decision.domain.Decision;
-import com.wedit.weditapp.domain.decision.domain.repository.DecisionRepository;
+import com.wedit.weditapp.domain.comment.service.CommentService;
+import com.wedit.weditapp.domain.decision.service.DecisionService;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
@@ -39,8 +34,8 @@ public class InvitationService {
 	private final ImageService imageService;
 	private final MemberRepository memberRepository;
 	private final BankAccountService bankAccountService;
-	private final CommentRepository commentRepository;
-	private final DecisionRepository decisionRepository;
+	private final CommentService commentService;
+	private final DecisionService decisionService;
 
 	// 청첩장 정보 등록 -> 생성
 	public Void createInvitation(UserDetails userDetails, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
@@ -75,7 +70,6 @@ public class InvitationService {
 		imageService.saveImages(images, invitation);
 
 		return null;
-		//return InvitationResponseDTO.from(invitationRepository.save(invitation));
 	}
 
 	// 청첩장 조회
@@ -126,6 +120,16 @@ public class InvitationService {
 			imageService.updateImages(newImages, invitation);
 		}
 
+		// guestBookOption이 false로 변경된 경우 방명록 삭제
+		if (!updateRequest.isGuestBookOption()) {
+			commentService.deleteComment(invitation);
+		}
+
+		// decisionOption이 false로 변경된 경우 참석 의사 삭제
+		if (!updateRequest.isDecisionOption()) {
+			decisionService.deleteDecision(invitation);
+		}
+
 		invitationRepository.save(invitation);
 	}
 
@@ -165,16 +169,10 @@ public class InvitationService {
 		imageService.deleteImages(invitation);
 
 		// 3. Comment 삭제
-		List<Comment> comments = commentRepository.findByInvitationId(invitationId, Pageable.unpaged()).getContent();
-		if (!comments.isEmpty()) {
-			commentRepository.deleteAll(comments);
-		}
+		commentService.deleteComment(invitation);
 
 		// 4. Decision 삭제
-		List<Decision> decisions = decisionRepository.findByInvitationId(invitationId);
-		if (!decisions.isEmpty()) {
-			decisionRepository.deleteAll(decisions);
-		}
+		decisionService.deleteDecision(invitation);
 
 		// 5. Invitation 삭제
 		invitationRepository.delete(invitation);
