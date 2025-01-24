@@ -46,12 +46,6 @@ public class BankAccountService {
 
 	// 계좌 정보 수정
 	public void updateBankAccount(List<BankAccountDto> bankAccountDtos, Invitation invitation) {
-		// 계좌 공개 옵션이 false라면 모든 계좌 삭제
-		if (!invitation.isAccountOption()) {
-			deleteBankAccount(invitation);
-			return;
-		}
-
 		List<BankAccount> updatedAccounts = bankAccountDtos.stream()
 			.map(dto -> {
 				BankAccount account = bankAccountRepository.findByInvitationAndSide(invitation, dto.getSide());

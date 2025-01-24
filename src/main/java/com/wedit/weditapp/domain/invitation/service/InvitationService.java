@@ -113,6 +113,8 @@ public class InvitationService {
 		// 계좌 정보 업데이트
 		if (updateRequest.isAccountOption() && updateRequest.getBankAccounts() != null) {
 			bankAccountService.updateBankAccount(updateRequest.getBankAccounts(), invitation);
+		}else if (!updateRequest.isAccountOption()) {
+			bankAccountService.deleteBankAccount(invitation);
 		}
 
 		// 이미지 정보 업데이트
