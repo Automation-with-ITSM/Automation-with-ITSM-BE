@@ -68,4 +68,18 @@ public class ImageService {
 		// 새로운 이미지 업로드 및 저장
 		saveImages(newImages, invitation);
 	}
+
+	// 이미지 삭제
+	public void deleteImages(Invitation invitation) {
+		// 청첩장 관련 이미지 조회
+		List<Image> images = imageRepository.findByInvitation(invitation);
+
+		// S3에서 이미지 삭제 및 DB에서 데이터 삭제
+		if (!images.isEmpty()) {
+			images.forEach(image -> {
+				s3Service.removeFile(image.getUrl()); // S3에서 삭제
+			});
+			imageRepository.deleteAll(images); // DB에서 이미지 삭제
+		}
+	}
 }
