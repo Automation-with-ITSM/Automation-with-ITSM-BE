@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,16 +34,16 @@ import lombok.RequiredArgsConstructor;
 public class InvitationController {
 	private final InvitationService invitationService;
 
-	@PostMapping(path="/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(summary = "필수 정보 등록", description = "청첩장 등록 및 이미지 업로드")
 	public ResponseEntity<GlobalResponseDto<Void>> createInvitation(
 		@RequestPart("images") List<MultipartFile> images,
 		@Valid @RequestPart("content") InvitationCreateRequestDto request,
-		@PathVariable Long memberId) {
-		//@AuthenticationPrincipal UserDetails userDetail
+		@AuthenticationPrincipal UserDetails userDetail) {
+
 
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(GlobalResponseDto.success(invitationService.createInvitation(memberId, request, images)));
+			.body(GlobalResponseDto.success(invitationService.createInvitation(userDetail, request, images)));
 	}
 
 	@GetMapping("/{invitationId}")

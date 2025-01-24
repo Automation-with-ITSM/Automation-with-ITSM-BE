@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,8 +42,8 @@ public class InvitationService {
 	private final DecisionRepository decisionRepository;
 
 	// 청첩장 정보 등록 -> 생성
-	public Void createInvitation(Long memberId, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
-		Member member = getMember(memberId);
+	public Void createInvitation(UserDetails userDetails, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
+		Member member = getMember(userDetails);
 		// Invitation 생성
 		Invitation invitation = Invitation.createInvitation(
 			member,
@@ -124,8 +125,8 @@ public class InvitationService {
 	}
 
 	// 멤버 찾기
-	private Member getMember(Long memberId) {
-		return memberRepository.findById(memberId)
+	private Member getMember(UserDetails userDetails) {
+		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 
