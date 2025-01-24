@@ -10,8 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
-import com.wedit.weditapp.domain.comments.domain.Comment;
-import com.wedit.weditapp.domain.comments.domain.repository.CommentRepository;
+import com.wedit.weditapp.domain.comment.domain.Comment;
+import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
