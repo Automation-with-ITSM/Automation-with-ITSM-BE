@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,9 +79,11 @@ public class InvitationService {
 	}
 
 	// 청첩장 조회
-	public InvitationResponseDto getInvitation(Long invitationId) {
+	public InvitationResponseDto getInvitation(UserDetails userDetails, Long invitationId) {
+		Member member = getMember(userDetails);
+
 		// 초대장 조회
-		Invitation invitation  = invitationRepository.findById(invitationId)
+		Invitation invitation  = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
@@ -90,8 +93,10 @@ public class InvitationService {
 	}
 
 	// 청첩장 수정
-	public void updateInvitation(Long invitationId, InvitationUpdateRequestDto updateRequest, List<MultipartFile> newImages) {
-		Invitation invitation = invitationRepository.findById(invitationId)
+	public void updateInvitation(UserDetails userDetails, Long invitationId, InvitationUpdateRequestDto updateRequest, List<MultipartFile> newImages) {
+		Member member = getMember(userDetails);
+
+		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		// 청첩장 정보 업데이트
@@ -121,18 +126,15 @@ public class InvitationService {
 			imageService.updateImages(newImages, invitation);
 		}
 
-		//invitationRepository.save(invitation);
+		invitationRepository.save(invitation);
 	}
 
-	// 멤버 찾기
-	private Member getMember(UserDetails userDetails) {
-		return memberRepository.findByEmail(userDetails.getUsername())
-			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
-	}
+	// url 생성
+	public String generateAndSaveInvitationUrl(UserDetails userDetails, Long invitationId) {
+		Member member = getMember(userDetails);
 
-	public String generateAndSaveInvitationUrl(Long invitationId) {
 		// 청첩장 조회
-		Invitation invitation = invitationRepository.findById(invitationId)
+		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		// URL 생성
@@ -149,9 +151,11 @@ public class InvitationService {
 		return invitation.getDistribution();
 	}
 
-	public void deleteInvitation(Long invitationId) {
+	// 청첩장 삭제
+	public void deleteInvitation(UserDetails userDetails, Long invitationId) {
+		Member member = getMember(userDetails);
 		// 청첩장 조회
-		Invitation invitation = invitationRepository.findById(invitationId)
+		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		// 1. BankAccount 삭제
@@ -186,5 +190,11 @@ public class InvitationService {
 		List<ImageResponseDto> images = imageService.getImages(invitation);
 
 		return InvitationResponseDto.from(invitation, bankAccounts, images);
+	}
+
+	// 멤버 찾기
+	private Member getMember(UserDetails userDetails) {
+		return memberRepository.findByEmail(userDetails.getUsername())
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 }
