@@ -9,7 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
-import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
 import com.wedit.weditapp.domain.comment.dto.response.PagedCommentResponseDto;
 import com.wedit.weditapp.domain.comment.service.CommentService;
 import com.wedit.weditapp.domain.decision.service.DecisionService;
@@ -42,6 +41,11 @@ public class InvitationService {
 	// 청첩장 정보 등록 -> 생성
 	public Void createInvitation(UserDetails userDetails, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(userDetails);
+
+		// 초대장 생성 요청이 null인지 확인
+		if (invitationRequest == null) {
+			throw new CommonException(ErrorCode.INVALID_INPUT_VALUE);
+		}
 
 		// Invitation 생성
 		Invitation invitation = Invitation.createInvitation(
@@ -79,6 +83,11 @@ public class InvitationService {
 	public InvitationResponseDto getInvitation(UserDetails userDetails, Long invitationId, int page) {
 		Member member = getMember(userDetails);
 
+		// 페이지 번호가 유효하지 않은 경우
+		if (page < 1) {
+			throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
+		}
+
 		// 초대장 조회
 		Invitation invitation  = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
@@ -93,6 +102,11 @@ public class InvitationService {
 	// 청첩장 수정
 	public void updateInvitation(UserDetails userDetails, Long invitationId, InvitationUpdateRequestDto updateRequest, List<MultipartFile> newImages) {
 		Member member = getMember(userDetails);
+
+		// 요청 데이터가 비었는지 확인
+		if (updateRequest == null) {
+			throw new CommonException(ErrorCode.INVALID_INPUT_VALUE);
+		}
 
 		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
@@ -186,6 +200,11 @@ public class InvitationService {
 
 	// 비회원 청첩장 조회
 	public InvitationResponseDto getInvitationForGuest(String uniqueId, int page) {
+		// 페이지 번호가 유효하지 않은 경우
+		if (page < 1) {
+			throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
+		}
+
 		// UUID 기반으로 청첩장 조회
 		Invitation invitation = invitationRepository.findByUniqueId(uniqueId)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
