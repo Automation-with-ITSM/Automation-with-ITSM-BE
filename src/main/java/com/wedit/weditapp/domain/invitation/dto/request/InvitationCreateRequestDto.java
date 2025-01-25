@@ -36,8 +36,6 @@ public class InvitationCreateRequestDto {
 
     private Theme theme; // 테마
 
-    private String distribution; // 청첩장 URL
-
     private boolean guestBookOption; // 방명록 옵션
 
     private boolean decisionOption; // 참석 의사 수집 옵션
