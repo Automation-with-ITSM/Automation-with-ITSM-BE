@@ -50,10 +50,9 @@ public class InvitationController {
 	@Operation(summary = "청첩장 조회", description = "특정 청첩장 상세 정보 조회")
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitation(
 		@PathVariable Long invitationId,
-		@RequestParam(defaultValue = "1") int page, // 기본 페이지는 1
 		@AuthenticationPrincipal UserDetails userDetail){
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(invitationService.getInvitation(userDetail, invitationId, page)));
+			.body(GlobalResponseDto.success(invitationService.getInvitation(userDetail, invitationId)));
 	}
 
 	@PatchMapping(path = "/{invitationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -91,9 +90,8 @@ public class InvitationController {
 	@GetMapping("/guest/{uniqueId}")
 	@Operation(summary = "비회원 청첩장 조회", description = "UUID 기반으로 청첩장 조회")
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitationForGuest(
-		@PathVariable String uniqueId,
-		@RequestParam(defaultValue = "1") int page) { // 기본 페이지는 1
-		InvitationResponseDto response = invitationService.getInvitationForGuest(uniqueId, page);
+		@PathVariable String uniqueId) {
+		InvitationResponseDto response = invitationService.getInvitationForGuest(uniqueId);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(response));
 	}

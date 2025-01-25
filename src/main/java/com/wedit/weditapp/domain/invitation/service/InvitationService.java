@@ -2,13 +2,18 @@ package com.wedit.weditapp.domain.invitation.service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
+import com.wedit.weditapp.domain.comment.domain.Comment;
+import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
+import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
 import com.wedit.weditapp.domain.comment.dto.response.PagedCommentResponseDto;
 import com.wedit.weditapp.domain.comment.service.CommentService;
 import com.wedit.weditapp.domain.decision.service.DecisionService;
@@ -37,6 +42,7 @@ public class InvitationService {
 	private final BankAccountService bankAccountService;
 	private final CommentService commentService;
 	private final DecisionService decisionService;
+	private final CommentRepository commentRepository;
 
 	// 청첩장 정보 등록 -> 생성
 	public Void createInvitation(UserDetails userDetails, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
@@ -80,13 +86,8 @@ public class InvitationService {
 	}
 
 	// 청첩장 조회
-	public InvitationResponseDto getInvitation(UserDetails userDetails, Long invitationId, int page) {
+	public InvitationResponseDto getInvitation(UserDetails userDetails, Long invitationId) {
 		Member member = getMember(userDetails);
-
-		// 페이지 번호가 유효하지 않은 경우
-		if (page < 1) {
-			throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
-		}
 
 		// 초대장 조회
 		Invitation invitation  = invitationRepository.findByIdAndMember(invitationId, member)
@@ -94,9 +95,9 @@ public class InvitationService {
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
 		List<ImageResponseDto> images = imageService.getImages(invitation);
-		PagedCommentResponseDto comments = commentService.findAllCommentsByInvitationId(invitationId, page);
+		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.getComments());
+		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.stream().map(CommentResponseDto::from).collect(Collectors.toList()));
 	}
 
 	// 청첩장 수정
@@ -199,21 +200,16 @@ public class InvitationService {
 	}
 
 	// 비회원 청첩장 조회
-	public InvitationResponseDto getInvitationForGuest(String uniqueId, int page) {
-		// 페이지 번호가 유효하지 않은 경우
-		if (page < 1) {
-			throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
-		}
-
+	public InvitationResponseDto getInvitationForGuest(String uniqueId) {
 		// UUID 기반으로 청첩장 조회
 		Invitation invitation = invitationRepository.findByUniqueId(uniqueId)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
 		List<ImageResponseDto> images = imageService.getImages(invitation);
-		PagedCommentResponseDto comments = commentService.findAllCommentsByInvitationId(invitation.getId(), page);
+		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.getComments());
+		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.stream().map(CommentResponseDto::from).collect(Collectors.toList()));
 	}
 
 	// 멤버 찾기
