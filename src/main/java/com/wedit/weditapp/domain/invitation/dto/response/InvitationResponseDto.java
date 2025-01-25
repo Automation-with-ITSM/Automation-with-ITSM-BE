@@ -1,12 +1,11 @@
 package com.wedit.weditapp.domain.invitation.dto.response;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
+import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.Theme;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,13 +48,10 @@ public class InvitationResponseDto {
 
     private List<ImageResponseDto> image;
 
-    // DTO 생성 후 활성화
-    //private List<GuestbookResponseDTO> guestbooks; // 방명록 리스트
+    private List<CommentResponseDto> comment; // 방명록 리스트
 
     @Builder
-    private InvitationResponseDto(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image
-            //, List<GuestbookResponseDTO> guestbooks
-    ) {
+    private InvitationResponseDto(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
         this.groom = groom;
         this.bride = bride;
         this.groomF = groomF;
@@ -72,12 +68,10 @@ public class InvitationResponseDto {
         this.accountOption = accountOption;
         this.bankAccounts = bankAccounts;
         this.image = image;
-        //this.guestbooks = guestbooks;
+        this.comment = comment;
     }
 
-    public static InvitationResponseDto from(Invitation invitation, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image
-            //, List<GuestbookResponseDTO> guestbooks
-    ) {
+    public static InvitationResponseDto from(Invitation invitation, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
         return InvitationResponseDto.builder()
             .groom(invitation.getGroom())
             .bride(invitation.getBride())
@@ -95,7 +89,7 @@ public class InvitationResponseDto {
             .accountOption(invitation.isAccountOption())
             .bankAccounts(bankAccounts)
             .image(image)
-            //.guestbooks(guestbooks)
+            .comment(comment)
             .build();
     }
 }

@@ -1,5 +1,7 @@
 package com.wedit.weditapp.domain.decision.service;
 
+import java.util.List;
+
 import com.wedit.weditapp.domain.decision.domain.Decision;
 import com.wedit.weditapp.domain.decision.domain.repository.DecisionRepository;
 import com.wedit.weditapp.domain.decision.dto.request.DecisionCreateRequestDto;
@@ -53,4 +55,14 @@ public class DecisionService {
         return decisionRepository.save(decision);
     }
 
+    // 특정 청첩장의 참성 의사 모두 삭제
+    public void deleteDecision(Invitation invitation) {
+        List<Decision> decisions = decisionRepository.findByInvitation(invitation);
+
+        if (decisions == null || decisions.isEmpty()) {
+            return; // 참석 의사가 없거나 null이면 아무 작업도 하지 않음
+        }
+
+        decisionRepository.deleteAll(decisions);
+    }
 }

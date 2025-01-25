@@ -11,5 +11,4 @@ public interface BankAccountRepository extends JpaRepository<BankAccount, Long> 
 	List<BankAccount> findByInvitation(Invitation invitation);
 
 	BankAccount findByInvitationAndSide(Invitation invitation, AccountSide side);
-
 }

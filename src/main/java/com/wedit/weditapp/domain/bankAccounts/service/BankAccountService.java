@@ -23,6 +23,10 @@ public class BankAccountService {
 
 	// DTO 리스트를 엔티티 리스트로 변환하여 저장
 	public List<BankAccount> createBankAccounts(List<BankAccountDto> bankAccountDtos, Invitation invitation) {
+		// 계좌 정보 리스트가 비었는지 확인
+		if (bankAccountDtos == null || bankAccountDtos.isEmpty()) {
+			throw new CommonException(ErrorCode.BANK_ACCOUNT_EMPTY);
+		}
 		List<BankAccount> bankAccounts = bankAccountDtos.stream()
 			.map(dto -> BankAccount.createBankAccount(
 				dto.getSide(),
@@ -46,6 +50,11 @@ public class BankAccountService {
 
 	// 계좌 정보 수정
 	public void updateBankAccount(List<BankAccountDto> bankAccountDtos, Invitation invitation) {
+		// 계좌 정보 리스트가 비었는지 확인
+		if (bankAccountDtos == null || bankAccountDtos.isEmpty()) {
+			throw new CommonException(ErrorCode.BANK_ACCOUNT_EMPTY);
+		}
+
 		List<BankAccount> updatedAccounts = bankAccountDtos.stream()
 			.map(dto -> {
 				BankAccount account = bankAccountRepository.findByInvitationAndSide(invitation, dto.getSide());
@@ -77,11 +86,14 @@ public class BankAccountService {
 		bankAccountRepository.saveAll(updatedAccounts);
 	}
 
-	// BankAccount 삭제
+	// 계좌 정보 삭제
 	public void deleteBankAccount(Invitation invitation) {
 		List<BankAccount> bankAccounts = bankAccountRepository.findByInvitation(invitation);
-		if (!bankAccounts.isEmpty()) {
-			bankAccountRepository.deleteAll(bankAccounts);
+
+		if (bankAccounts == null || bankAccounts.isEmpty()) {
+			return;
 		}
+
+		bankAccountRepository.deleteAll(bankAccounts);
 	}
 }

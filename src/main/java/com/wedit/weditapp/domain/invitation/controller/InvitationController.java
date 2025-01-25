@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +42,6 @@ public class InvitationController {
 		@Valid @RequestPart("content") InvitationCreateRequestDto request,
 		@AuthenticationPrincipal UserDetails userDetail) {
 
-
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(GlobalResponseDto.success(invitationService.createInvitation(userDetail, request, images)));
 	}
@@ -49,9 +49,10 @@ public class InvitationController {
 	@GetMapping("/{invitationId}")
 	@Operation(summary = "청첩장 조회", description = "특정 청첩장 상세 정보 조회")
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitation(
-		@PathVariable Long invitationId){
+		@PathVariable Long invitationId,
+		@AuthenticationPrincipal UserDetails userDetail){
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(GlobalResponseDto.success(invitationService.getInvitation(invitationId)));
+			.body(GlobalResponseDto.success(invitationService.getInvitation(userDetail, invitationId)));
 	}
 
 	@PatchMapping(path = "/{invitationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -59,8 +60,9 @@ public class InvitationController {
 	public ResponseEntity<GlobalResponseDto<Void>> updateInvitation(
 		@PathVariable Long invitationId,
 		@RequestPart("images") List<MultipartFile> newImages,
-		@Valid @RequestPart("content") InvitationUpdateRequestDto updateRequest) {
-		invitationService.updateInvitation(invitationId, updateRequest, newImages);
+		@Valid @RequestPart("content") InvitationUpdateRequestDto updateRequest,
+		@AuthenticationPrincipal UserDetails userDetail) {
+		invitationService.updateInvitation(userDetail, invitationId, updateRequest, newImages);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
@@ -68,16 +70,19 @@ public class InvitationController {
 	@PostMapping("/url/{invitationId}")
 	@Operation(summary = "청첩장 URL 생성", description = "UUID 기반 고유 URL 생성")
 	public ResponseEntity<GlobalResponseDto<String>> generateInvitationUrl(
-		@PathVariable Long invitationId) {
-		String url = invitationService.generateAndSaveInvitationUrl(invitationId);
+		@PathVariable Long invitationId,
+		@AuthenticationPrincipal UserDetails userDetail) {
+		String url = invitationService.generateAndSaveInvitationUrl(userDetail, invitationId);
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(url));
 	}
 
 	@DeleteMapping("/{invitationId}")
 	@Operation(summary = "청첩장 삭제", description = "청첩장 및 관련 데이터 삭제")
-	public ResponseEntity<GlobalResponseDto<Void>> deleteInvitation(@PathVariable Long invitationId) {
-		invitationService.deleteInvitation(invitationId); // 서비스 호출
+	public ResponseEntity<GlobalResponseDto<Void>> deleteInvitation(
+		@PathVariable Long invitationId,
+		@AuthenticationPrincipal UserDetails userDetail) {
+		invitationService.deleteInvitation(userDetail, invitationId); // 서비스 호출
 		return ResponseEntity.status(HttpStatus.OK) // HTTP 204 No Content
 			.body(GlobalResponseDto.success());
 	}

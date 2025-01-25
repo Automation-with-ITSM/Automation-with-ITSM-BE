@@ -2,19 +2,21 @@ package com.wedit.weditapp.domain.invitation.service;
 
 import java.util.List;
 import java.util.UUID;
-
-import org.springframework.data.domain.Pageable;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
 import com.wedit.weditapp.domain.comment.domain.Comment;
 import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
-import com.wedit.weditapp.domain.decision.domain.Decision;
-import com.wedit.weditapp.domain.decision.domain.repository.DecisionRepository;
+import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
+import com.wedit.weditapp.domain.comment.dto.response.PagedCommentResponseDto;
+import com.wedit.weditapp.domain.comment.service.CommentService;
+import com.wedit.weditapp.domain.decision.service.DecisionService;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.image.service.ImageService;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
@@ -38,12 +40,19 @@ public class InvitationService {
 	private final ImageService imageService;
 	private final MemberRepository memberRepository;
 	private final BankAccountService bankAccountService;
+	private final CommentService commentService;
+	private final DecisionService decisionService;
 	private final CommentRepository commentRepository;
-	private final DecisionRepository decisionRepository;
 
 	// 청첩장 정보 등록 -> 생성
 	public Void createInvitation(UserDetails userDetails, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
 		Member member = getMember(userDetails);
+
+		// 초대장 생성 요청이 null인지 확인
+		if (invitationRequest == null) {
+			throw new CommonException(ErrorCode.INVALID_INPUT_VALUE);
+		}
+
 		// Invitation 생성
 		Invitation invitation = Invitation.createInvitation(
 			member,
@@ -74,24 +83,36 @@ public class InvitationService {
 		imageService.saveImages(images, invitation);
 
 		return null;
-		//return InvitationResponseDTO.from(invitationRepository.save(invitation));
 	}
 
 	// 청첩장 조회
-	public InvitationResponseDto getInvitation(Long invitationId) {
+	public InvitationResponseDto getInvitation(UserDetails userDetails, Long invitationId) {
+		Member member = getMember(userDetails);
+
 		// 초대장 조회
-		Invitation invitation  = invitationRepository.findById(invitationId)
+		Invitation invitation  = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
 		List<ImageResponseDto> images = imageService.getImages(invitation);
+		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images);
+		return InvitationResponseDto.from(invitation, bankAccounts, images,
+			comments.stream()
+				.map(CommentResponseDto::from)
+				.collect(Collectors.toList()));
 	}
 
 	// 청첩장 수정
-	public void updateInvitation(Long invitationId, InvitationUpdateRequestDto updateRequest, List<MultipartFile> newImages) {
-		Invitation invitation = invitationRepository.findById(invitationId)
+	public void updateInvitation(UserDetails userDetails, Long invitationId, InvitationUpdateRequestDto updateRequest, List<MultipartFile> newImages) {
+		Member member = getMember(userDetails);
+
+		// 요청 데이터가 비었는지 확인
+		if (updateRequest == null) {
+			throw new CommonException(ErrorCode.INVALID_INPUT_VALUE);
+		}
+
+		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		// 청첩장 정보 업데이트
@@ -114,6 +135,8 @@ public class InvitationService {
 		// 계좌 정보 업데이트
 		if (updateRequest.isAccountOption() && updateRequest.getBankAccounts() != null) {
 			bankAccountService.updateBankAccount(updateRequest.getBankAccounts(), invitation);
+		}else if (!updateRequest.isAccountOption()) {
+			bankAccountService.deleteBankAccount(invitation);
 		}
 
 		// 이미지 정보 업데이트
@@ -121,18 +144,25 @@ public class InvitationService {
 			imageService.updateImages(newImages, invitation);
 		}
 
-		//invitationRepository.save(invitation);
+		// guestBookOption이 false로 변경된 경우 방명록 삭제
+		if (!updateRequest.isGuestBookOption()) {
+			commentService.deleteComment(invitation);
+		}
+
+		// decisionOption이 false로 변경된 경우 참석 의사 삭제
+		if (!updateRequest.isDecisionOption()) {
+			decisionService.deleteDecision(invitation);
+		}
+
+		invitationRepository.save(invitation);
 	}
 
-	// 멤버 찾기
-	private Member getMember(UserDetails userDetails) {
-		return memberRepository.findByEmail(userDetails.getUsername())
-			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
-	}
+	// url 생성
+	public String generateAndSaveInvitationUrl(UserDetails userDetails, Long invitationId) {
+		Member member = getMember(userDetails);
 
-	public String generateAndSaveInvitationUrl(Long invitationId) {
 		// 청첩장 조회
-		Invitation invitation = invitationRepository.findById(invitationId)
+		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		// URL 생성
@@ -149,9 +179,11 @@ public class InvitationService {
 		return invitation.getDistribution();
 	}
 
-	public void deleteInvitation(Long invitationId) {
+	// 청첩장 삭제
+	public void deleteInvitation(UserDetails userDetails, Long invitationId) {
+		Member member = getMember(userDetails);
 		// 청첩장 조회
-		Invitation invitation = invitationRepository.findById(invitationId)
+		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		// 1. BankAccount 삭제
@@ -161,16 +193,10 @@ public class InvitationService {
 		imageService.deleteImages(invitation);
 
 		// 3. Comment 삭제
-		List<Comment> comments = commentRepository.findByInvitationId(invitationId, Pageable.unpaged()).getContent();
-		if (!comments.isEmpty()) {
-			commentRepository.deleteAll(comments);
-		}
+		commentService.deleteComment(invitation);
 
 		// 4. Decision 삭제
-		List<Decision> decisions = decisionRepository.findByInvitationId(invitationId);
-		if (!decisions.isEmpty()) {
-			decisionRepository.deleteAll(decisions);
-		}
+		decisionService.deleteDecision(invitation);
 
 		// 5. Invitation 삭제
 		invitationRepository.delete(invitation);
@@ -184,7 +210,17 @@ public class InvitationService {
 
 		List<BankAccountDto> bankAccounts = bankAccountService.getBankAccounts(invitation);
 		List<ImageResponseDto> images = imageService.getImages(invitation);
+		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images);
+		return InvitationResponseDto.from(invitation, bankAccounts, images,
+			comments.stream()
+				.map(CommentResponseDto::from)
+				.collect(Collectors.toList()));
+	}
+
+	// 멤버 찾기
+	private Member getMember(UserDetails userDetails) {
+		return memberRepository.findByEmail(userDetails.getUsername())
+			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 }

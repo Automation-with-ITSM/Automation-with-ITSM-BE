@@ -1,5 +1,7 @@
 package com.wedit.weditapp.domain.comment.service;
 
+import java.util.List;
+
 import com.wedit.weditapp.domain.comment.domain.Comment;
 import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
 import com.wedit.weditapp.domain.comment.dto.request.CommentCreateRequestDto;
@@ -69,5 +71,16 @@ public class CommentService {
         );
 
         return commentRepository.save(comment);
+    }
+
+    // 방명록 전체 삭제
+    public void deleteComment(Invitation invitation) {
+        List<Comment> comments = commentRepository.findByInvitation(invitation);
+
+        if (comments == null || comments.isEmpty()) {
+            return; // 댓글이 없거나 null이면 아무 작업도 하지 않음
+        }
+
+        commentRepository.deleteAll(comments);
     }
 }
