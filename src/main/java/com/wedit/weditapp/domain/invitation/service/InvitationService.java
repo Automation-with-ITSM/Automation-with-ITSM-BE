@@ -97,7 +97,10 @@ public class InvitationService {
 		List<ImageResponseDto> images = imageService.getImages(invitation);
 		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.stream().map(CommentResponseDto::from).collect(Collectors.toList()));
+		return InvitationResponseDto.from(invitation, bankAccounts, images,
+			comments.stream()
+				.map(CommentResponseDto::from)
+				.collect(Collectors.toList()));
 	}
 
 	// 청첩장 수정
@@ -209,7 +212,10 @@ public class InvitationService {
 		List<ImageResponseDto> images = imageService.getImages(invitation);
 		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images, comments.stream().map(CommentResponseDto::from).collect(Collectors.toList()));
+		return InvitationResponseDto.from(invitation, bankAccounts, images,
+			comments.stream()
+				.map(CommentResponseDto::from)
+				.collect(Collectors.toList()));
 	}
 
 	// 멤버 찾기
