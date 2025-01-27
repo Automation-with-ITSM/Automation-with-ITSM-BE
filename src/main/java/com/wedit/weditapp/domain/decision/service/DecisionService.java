@@ -38,17 +38,21 @@ public class DecisionService {
     }
 
     // 특정 청첩장에 참석의사 등록
-    public Decision createDecision(DecisionCreateRequestDto decisionCreateRequestDTO) {
+    public Decision createDecision(DecisionCreateRequestDto decisionCreateRequestDto) {
 
-        Invitation invitation = invitationRepository.findById(decisionCreateRequestDTO.getInvitationId())
+        // 잘못된 청첩장 id일 경우
+        if (decisionCreateRequestDto.getInvitationId() == null || decisionCreateRequestDto.getInvitationId() <= 0) {
+            throw new CommonException(ErrorCode.INVALID_INVITATION_ID);
+        }
+
+        Invitation invitation = invitationRepository.findById(decisionCreateRequestDto.getInvitationId())
                 .orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
-
         Decision decision = Decision.createDecision(
-                decisionCreateRequestDTO.getName(),
-                decisionCreateRequestDTO.getPhoneNumber(),
-                decisionCreateRequestDTO.getAddPerson(),
-                decisionCreateRequestDTO.getSide(),
+                decisionCreateRequestDto.getName(),
+                decisionCreateRequestDto.getPhoneNumber(),
+                decisionCreateRequestDto.getAddPerson(),
+                decisionCreateRequestDto.getSide(),
                 invitation
         );
 
