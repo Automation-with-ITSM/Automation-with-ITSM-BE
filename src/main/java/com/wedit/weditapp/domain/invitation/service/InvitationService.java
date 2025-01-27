@@ -8,13 +8,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
 import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
 import com.wedit.weditapp.domain.comment.domain.Comment;
 import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
 import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
-import com.wedit.weditapp.domain.comment.dto.response.PagedCommentResponseDto;
 import com.wedit.weditapp.domain.comment.service.CommentService;
 import com.wedit.weditapp.domain.decision.service.DecisionService;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
@@ -43,6 +41,8 @@ public class InvitationService {
 	private final CommentService commentService;
 	private final DecisionService decisionService;
 	private final CommentRepository commentRepository;
+	private static final int MAX_INVITATIONS = 10;
+
 
 	// 청첩장 정보 등록 -> 생성
 	public Void createInvitation(UserDetails userDetails, InvitationCreateRequestDto invitationRequest, List<MultipartFile> images) {
@@ -82,6 +82,9 @@ public class InvitationService {
 		// 이미지 저장
 		imageService.saveImages(images, invitation);
 
+		// 초대장 생성 후, 회원의 청첩장 개수를 확인하고 초과된 청첩장 삭제
+		cleanUpExcessInvitations(userDetails);
+
 		return null;
 	}
 
@@ -101,6 +104,23 @@ public class InvitationService {
 			comments.stream()
 				.map(CommentResponseDto::from)
 				.collect(Collectors.toList()));
+	}
+
+	// 청첩장 목록 조회 (생성일 기준 오름차순)
+	public List<InvitationResponseDto> getMemberInvitations(UserDetails userDetails) {
+		Member member = getMember(userDetails);
+		List<Invitation> invitations = invitationRepository.findByMemberIdOrderByCreatedAtAsc(member.getId());
+
+		return invitations.stream()
+				.map(invitation -> InvitationResponseDto.from(
+						invitation,
+						bankAccountService.getBankAccounts(invitation),
+						imageService.getImages(invitation),
+						commentRepository.findByInvitation(invitation).stream()
+								.map(CommentResponseDto::from)
+								.collect(Collectors.toList())
+				))
+				.collect(Collectors.toList());
 	}
 
 	// 청첩장 수정
@@ -200,6 +220,25 @@ public class InvitationService {
 
 		// 5. Invitation 삭제
 		invitationRepository.delete(invitation);
+	}
+
+	// 10개 초과된 청첩장 삭제
+	public void cleanUpExcessInvitations(UserDetails userDetails) {
+		Member member = getMember(userDetails);
+		Long memberId = member.getId();
+
+		List<Invitation> invitations = invitationRepository.findByMemberIdOrderByCreatedAtAsc(memberId);
+		if (invitations.size() > MAX_INVITATIONS) {
+			int excessCount = invitations.size() - MAX_INVITATIONS;
+			List<Invitation> excessInvitations = invitations.subList(0, excessCount);
+			List<Long> excessInvitationIds = excessInvitations.stream()
+					.map(Invitation::getId)
+					.collect(Collectors.toList());
+
+			for (Long invitationId : excessInvitationIds) {
+				deleteInvitation(userDetails, invitationId);
+			}
+		}
 	}
 
 	// 비회원 청첩장 조회
