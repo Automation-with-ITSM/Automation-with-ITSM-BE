@@ -4,8 +4,6 @@ import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
 import com.wedit.weditapp.global.auth.login.domain.CustomOAuth2User;
 import com.wedit.weditapp.global.auth.jwt.JwtProvider;
-import com.wedit.weditapp.global.auth.login.service.RefreshTokenService;
-import com.wedit.weditapp.global.auth.login.service.TokenManager;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,8 +21,6 @@ import java.io.IOException;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
-    private final RefreshTokenService refreshTokenService;
-    private final TokenManager tokenManager;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -38,11 +34,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("로그인 성공했으나 DB에 회원 정보가 없음: " + email));
 
-        // 4. 새 토큰 발급 & Redis 저장 & 응답 전송
-        tokenManager.issueNewTokens(response, email, true);
+        // 3. AccessToken & RefreshToken 발급 + DB 저장
+        String accessToken = jwtProvider.createAccessToken(member.getEmail());
+        String refreshToken = member.getRefreshToken();
 
+        if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
+            refreshToken = jwtProvider.createRefreshToken();
+            member.updateRefreshToken(refreshToken);
+            memberRepository.save(member);
+            log.info("새 Refresh Token 발급: {}", refreshToken);
+        }
 
-        // 5. 응답
+        jwtProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }
