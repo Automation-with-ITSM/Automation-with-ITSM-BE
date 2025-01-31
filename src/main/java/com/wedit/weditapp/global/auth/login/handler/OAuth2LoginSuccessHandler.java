@@ -48,7 +48,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
 
         // 5. Access Token은 JSON Body로 반환, Refresh Token은 HttpOnly Secure Cookie에 저장
-        jwtProvider.sendAccessTokenResponse(response, accessToken);
+        //jwtProvider.sendAccessTokenResponse(response, accessToken);
         jwtProvider.addRefreshTokenCookie(response, refreshToken);
 
         // 로그인 성공 후 프런트 : `/redirect`로 이동 & 백엔드 : Access Token 보여주기
@@ -59,6 +59,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             log.warn("프론트엔드가 실행되지 않음. Access Token을 JSON 응답으로 반환합니다.");
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"accessToken\": \"" + accessToken + "\"}");
         }
     }
 
