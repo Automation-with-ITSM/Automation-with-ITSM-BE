@@ -1,6 +1,7 @@
 package com.wedit.weditapp.domain.member.controller;
 
 import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDto;
+import com.wedit.weditapp.domain.invitation.dto.response.StatisticsDto;
 import com.wedit.weditapp.domain.invitation.service.InvitationService;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;
@@ -35,6 +36,16 @@ public class MemberController {
     public ResponseEntity<GlobalResponseDto<List<InvitationResponseDto>>> getMemberInvitations(
             @AuthenticationPrincipal UserDetails userDetails) {
         List<InvitationResponseDto> invitations = invitationService.getMemberInvitations(userDetails);
-        return ResponseEntity.ok(GlobalResponseDto.success(invitations));
+        return ResponseEntity.status(HttpStatus.OK).body(GlobalResponseDto.success(invitations));
+    }
+
+    @GetMapping("/{invitationId}/analysis")
+    @Operation(summary = "분석 보기 조회", description = "분석 보기를 조회합니다.")
+    public ResponseEntity<GlobalResponseDto<StatisticsDto>> getInvitationStatistics(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable Long invitationId) {
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(GlobalResponseDto.success(invitationService.getInvitationStatistics(userDetails, invitationId)));
     }
 }
