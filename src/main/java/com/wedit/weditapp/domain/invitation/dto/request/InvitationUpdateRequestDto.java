@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
@@ -33,8 +34,9 @@ public class InvitationUpdateRequestDto {
 
     private String extraAddress; // 상세 주소
 
-    @NotNull(message = "date cannot be null")
     private LocalDate date; // 결혼식 날짜
+
+    private LocalTime time; // 결혼식 날짜
 
     private Theme theme; // 테마
 
