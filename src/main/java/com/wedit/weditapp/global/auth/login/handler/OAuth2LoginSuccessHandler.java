@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 @Slf4j
 @Component
@@ -36,17 +38,41 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 3. AccessToken & RefreshToken 발급 + DB 저장
         String accessToken = jwtProvider.createAccessToken(member.getEmail());
-        String refreshToken = member.getRefreshToken();
+        String refreshToken = member.getRefreshToken(); // 추후 Redis 추가할 때 변경
 
         if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
             refreshToken = jwtProvider.createRefreshToken();
             member.updateRefreshToken(refreshToken);
             memberRepository.save(member);
-            log.info("새 Refresh Token 발급: {}", refreshToken);
+            log.info("새 Refresh Token 발급 및 저장 완료"); // 이거 보여주면 안되서 지움
         }
 
-        jwtProvider.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+        // 5. Access Token은 JSON Body로 반환, Refresh Token은 HttpOnly Secure Cookie에 저장
+        jwtProvider.sendAccessTokenResponse(response, accessToken);
+        jwtProvider.addRefreshTokenCookie(response, refreshToken);
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        // 로그인 성공 후 프런트 : `/redirect`로 이동 & 백엔드 : Access Token 보여주기
+        if (isFrontendAvailable("http://localhost:5173/redirect")) {
+            log.info("Redirecting to frontend: http://localhost:5173/redirect");
+            response.sendRedirect("http://localhost:5173/redirect");
+        } else {
+            log.warn("프론트엔드가 실행되지 않음. Access Token을 JSON 응답으로 반환합니다.");
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+        }
+    }
+
+    private boolean isFrontendAvailable(String url) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.setConnectTimeout(1000);
+            connection.setReadTimeout(1000);
+            int responseCode = connection.getResponseCode();
+            return (200 <= responseCode && responseCode <= 399);
+        } catch (IOException e) {
+            log.warn("프론트엔드 서버({})가 실행되지 않음.", url);
+            return false;
+        }
     }
 }
