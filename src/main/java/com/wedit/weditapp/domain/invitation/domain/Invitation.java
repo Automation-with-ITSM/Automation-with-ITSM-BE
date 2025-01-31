@@ -75,6 +75,12 @@ public class Invitation extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean accountOption; // 계좌 정보 공개 여부
 
+    @Column
+    private Integer totalVisitors;
+
+    @Column
+    private Integer dailyVisitors;
+
     @Builder
     private Invitation(String uniqueId,Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
         // 필수 필드 검증
@@ -98,6 +104,8 @@ public class Invitation extends BaseTimeEntity {
         this.guestBookOption = guestBookOption;
         this.decisionOption = decisionOption;
         this.accountOption = accountOption;
+        this.totalVisitors = 0;
+        this.dailyVisitors = 0;
     }
 
     public static Invitation createInvitation(Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
@@ -147,5 +155,17 @@ public class Invitation extends BaseTimeEntity {
             throw new IllegalStateException("URL is already set.");
         }
         this.distribution = url;
+    }
+
+    public void updateTotalVisitors() {
+        this.totalVisitors++;
+    }
+
+    public void updateDailyVisitors() {
+        this.dailyVisitors++;
+    }
+
+    public void clearDailyVisitors() {
+        this.dailyVisitors = 0;
     }
 }
