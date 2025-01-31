@@ -4,6 +4,7 @@ import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -32,19 +35,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // RefreshToken 처리
-        String refreshToken = jwtProvider.extractRefreshToken(request)
+        // Refresh Token이 존재하면 Access Token 재발급 시도
+        extractRefreshTokenFromCookie(request)
                 .filter(jwtProvider::validateToken)
-                .orElse(null);
+                .ifPresent(refreshToken -> reIssueAccessToken(response, refreshToken));
 
-        if (refreshToken != null) {
-            reIssueAccessToken(response, refreshToken);
-            return; // AccessToken 재발급 후 인증 진행 중단
-        }
-
-        // AccessToken 처리
+        // Access Token이 존재하면 인증 수행
         jwtProvider.extractAccessToken(request)
-                .filter(jwtProvider::validateToken).ifPresent(this::authenticate);
+                .filter(jwtProvider::validateToken)
+                .ifPresent(this::authenticate);
 
         filterChain.doFilter(request, response);
     }
@@ -56,13 +55,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         member -> {
                             String newAccessToken = jwtProvider.createAccessToken(member.getEmail());
                             String newRefreshToken = jwtProvider.createRefreshToken();
+
+                            // DB에 새로운 Refresh Token 저장
                             member.updateRefreshToken(newRefreshToken);
                             memberRepository.save(member);
-                            jwtProvider.sendAccessAndRefreshToken(response, newAccessToken, newRefreshToken);
+
+                            // Access Token은 JSON Body로 반환, Refresh Token은 쿠키로 저장
+                            jwtProvider.sendAccessTokenResponse(response, newAccessToken);
+                            jwtProvider.addRefreshTokenCookie(response, newRefreshToken);
                             log.info("AccessToken 및 RefreshToken 재발급 완료");
                         },
                         () -> log.error("유효하지 않은 RefreshToken으로 재발급 시도")
                 );
+    }
+
+    // HttpOnly Secure 쿠키에서 Refresh Token 추출
+    private Optional<String> extractRefreshTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
     }
 
     // AccessToken을 사용하여 사용자 인증
