@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -34,6 +35,8 @@ public class InvitationResponseDto {
 
     private LocalDate date; // 결혼식 날짜
 
+    private LocalTime time;
+
     private Theme theme; // 테마
 
     private String distribution; // 청첩장 URL
@@ -51,7 +54,7 @@ public class InvitationResponseDto {
     private List<CommentResponseDto> comment; // 방명록 리스트
 
     @Builder
-    private InvitationResponseDto(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
+    private InvitationResponseDto(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
         this.groom = groom;
         this.bride = bride;
         this.groomF = groomF;
@@ -61,6 +64,7 @@ public class InvitationResponseDto {
         this.address = address;
         this.extraAddress = extraAddress;
         this.date = date;
+        this.time = time;
         this.theme = theme;
         this.distribution = distribution;
         this.guestBookOption = guestBookOption;
@@ -82,6 +86,7 @@ public class InvitationResponseDto {
             .address(invitation.getAddress())
             .extraAddress(invitation.getExtraAddress())
             .date(invitation.getDate())
+            .time(invitation.getTime())
             .theme(invitation.getTheme())
             .distribution(invitation.getDistribution())
             .guestBookOption(invitation.isGuestBookOption())

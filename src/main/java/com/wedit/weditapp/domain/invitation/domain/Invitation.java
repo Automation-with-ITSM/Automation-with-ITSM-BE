@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -52,7 +53,11 @@ public class Invitation extends BaseTimeEntity {
     @Column
     private String extraAddress; // 세부 주소
 
+    @Column(nullable = false)
     private LocalDate date; // 결혼식 날짜
+
+    @Column(nullable = false)
+    private LocalTime time;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
@@ -71,9 +76,9 @@ public class Invitation extends BaseTimeEntity {
     private boolean accountOption; // 계좌 정보 공개 여부
 
     @Builder
-    private Invitation(String uniqueId,Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
+    private Invitation(String uniqueId,Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
         // 필수 필드 검증
-        if (member == null || groom == null || bride == null || address == null || date == null || theme == null) {
+        if (member == null || groom == null || bride == null || address == null || date == null || time == null || theme == null) {
             throw new IllegalArgumentException("필수 필드 누락");
         }
 
@@ -88,33 +93,35 @@ public class Invitation extends BaseTimeEntity {
         this.address = address;
         this.extraAddress = extraAddress;
         this.date = date;
+        this.time = time;
         this.theme = theme;
         this.guestBookOption = guestBookOption;
         this.decisionOption = decisionOption;
         this.accountOption = accountOption;
     }
 
-    public static Invitation createInvitation(Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
+    public static Invitation createInvitation(Member member, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
         return Invitation.builder()
-                .member(member)
-                .groom(groom)
-                .bride(bride)
-                .groomF(groomF)
-                .groomM(groomM)
-                .brideF(brideF)
-                .brideM(brideM)
-                .address(address)
-                .extraAddress(extraAddress)
-                .date(date)
-                .theme(theme)
-                .guestBookOption(guestBookOption)
-                .decisionOption(decisionOption)
-                .accountOption(accountOption)
-                .build();
+            .member(member)
+            .groom(groom)
+            .bride(bride)
+            .groomF(groomF)
+            .groomM(groomM)
+            .brideF(brideF)
+            .brideM(brideM)
+            .address(address)
+            .extraAddress(extraAddress)
+            .date(date)
+            .time(time)
+            .theme(theme)
+            .guestBookOption(guestBookOption)
+            .decisionOption(decisionOption)
+            .accountOption(accountOption)
+            .build();
     }
 
-    public void updateInvitation(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
-        if (member == null || groom == null || bride == null || address == null || date == null || theme == null) {
+    public void updateInvitation(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, boolean guestBookOption, boolean decisionOption, boolean accountOption) {
+        if (member == null || groom == null || bride == null || address == null || date == null || time == null || theme == null) {
             throw new IllegalArgumentException("필수 필드 누락");
         }
 
@@ -127,6 +134,7 @@ public class Invitation extends BaseTimeEntity {
         this.address = address;
         this.extraAddress = extraAddress;
         this.date = date;
+        this.time = time;
         this.theme = theme;
         this.guestBookOption = guestBookOption;
         this.decisionOption = decisionOption;

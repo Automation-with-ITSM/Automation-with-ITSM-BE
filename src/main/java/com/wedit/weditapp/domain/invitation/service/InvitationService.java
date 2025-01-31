@@ -65,6 +65,7 @@ public class InvitationService {
 			invitationRequest.getAddress(),
 			invitationRequest.getExtraAddress(),
 			invitationRequest.getDate(),
+			invitationRequest.getTime(),
 			invitationRequest.getTheme(),
 			invitationRequest.isGuestBookOption(),
 			invitationRequest.isDecisionOption(),
@@ -146,13 +147,14 @@ public class InvitationService {
 			updateRequest.getAddress(),
 			updateRequest.getExtraAddress(),
 			updateRequest.getDate(),
+			updateRequest.getTime(),
 			updateRequest.getTheme(),
 			updateRequest.isGuestBookOption(),
 			updateRequest.isDecisionOption(),
 			updateRequest.isAccountOption()
 		);
 
-		// 계좌 정보 업데이트
+		// 계좌 정보 업데이트 / isAccountOption이 false로 변경될 경우 계좌 정보 삭제
 		if (updateRequest.isAccountOption() && updateRequest.getBankAccounts() != null) {
 			bankAccountService.updateBankAccount(updateRequest.getBankAccounts(), invitation);
 		}else if (!updateRequest.isAccountOption()) {
@@ -188,7 +190,7 @@ public class InvitationService {
 		// URL 생성
 		if (invitation.getDistribution() == null) {
 			String uniqueCode = UUID.randomUUID().toString(); // 고유 코드 생성
-			String generatedUrl = "https://yourdomain.com/invitations/" + uniqueCode;
+			String generatedUrl = "https://wedit.site/invitations/" + uniqueCode;
 
 			// URL 저장
 			invitation.updateUrl(generatedUrl);
