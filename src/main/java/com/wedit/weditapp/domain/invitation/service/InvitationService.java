@@ -253,6 +253,9 @@ public class InvitationService {
 		List<ImageResponseDto> images = imageService.getImages(invitation);
 		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
+		invitation.updateDailyVisitors();
+		invitation.updateTotalVisitors();
+
 		return InvitationResponseDto.from(invitation, bankAccounts, images,
 			comments.stream()
 				.map(CommentResponseDto::from)
@@ -264,4 +267,5 @@ public class InvitationService {
 		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
+
 }
