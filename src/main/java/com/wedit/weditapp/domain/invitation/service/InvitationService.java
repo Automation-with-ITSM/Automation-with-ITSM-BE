@@ -190,7 +190,7 @@ public class InvitationService {
 		// URL 생성
 		if (invitation.getDistribution() == null) {
 			String uniqueCode = UUID.randomUUID().toString(); // 고유 코드 생성
-			String generatedUrl = "https://wedit.site/invitations/" + uniqueCode;
+			String generatedUrl = "http://wedit.site/invitations/" + uniqueCode;
 
 			// URL 저장
 			invitation.updateUrl(generatedUrl);
