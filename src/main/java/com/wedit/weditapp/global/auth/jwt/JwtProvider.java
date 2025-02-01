@@ -76,7 +76,7 @@ public class JwtProvider {
     // Access Token : HttpOnly, Secure 쿠키로 설정
     public void setAccessTokenCookie(HttpServletResponse response, String accessToken) {
         Cookie accessCookie = new Cookie(ACCESS_COOKIE_NAME, accessToken);
-        accessCookie.setHttpOnly(true);  // JavaScript에서 접근 불가능
+        accessCookie.setHttpOnly(false);  // JavaScript에서 접근 불가능
         accessCookie.setSecure(false);    // HTTPS 상황에서만 전송
         accessCookie.setPath("/");
         //accessCookie.setAttribute("SameSite", "Lax");
@@ -89,7 +89,7 @@ public class JwtProvider {
     // Refresh Token : HttpOnly, Secure 쿠키로 설정
     public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie refreshCookie = new Cookie(REFRESH_COOKIE_NAME, refreshToken);
-        refreshCookie.setHttpOnly(true); // JavaScript에서 접근 불가능
+        refreshCookie.setHttpOnly(false); // JavaScript에서 접근 불가능
         refreshCookie.setSecure(false); // HTTPS 환경에서만 전송
         refreshCookie.setPath("/");
         //refreshCookie.setAttribute("SameSite", "Lax");
