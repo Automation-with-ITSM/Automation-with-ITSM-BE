@@ -53,14 +53,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String newAccessToken = jwtProvider.createAccessToken(member.getEmail());
 
         // 5. Access Token -> 응답 헤더, Refresh Token -> HttpOnly Cookie
-        jwtProvider.setAccessTokenHeader(response, newAccessToken);
+        jwtProvider.setAccessTokenCookie(response, newAccessToken);
         jwtProvider.setRefreshTokenCookie(response, oldRefreshToken);
 
         // 6. 배포되는 서버용 - 원하는 페이지로 리다이렉트
         //log.info("리다이렉트: http://wedit.site/");
-        response.sendRedirect("http://localhost:5173/");
+        //response.sendRedirect("http://localhost:5173/");
 
         // 6. 로컬테스트용
-        //response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

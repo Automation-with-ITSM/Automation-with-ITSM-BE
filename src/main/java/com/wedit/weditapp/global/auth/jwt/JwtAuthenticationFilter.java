@@ -46,13 +46,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 쿠키에 Refresh Token이 존재 및 유효 -> 새로운 Access Token & Refresh Token 재발급
-        extractRefreshTokenFromCookie(request)
+        // 쿠키에서 Refresh Token 추출 & 유효성 검사 -> 재발급 로직
+        extractCookie(request, "refreshToken")
                 .filter(jwtProvider::validateToken)
-                .ifPresent(thisRefreshToken -> reIssueTokens(response, thisRefreshToken));
+                .ifPresent(refreshToken -> reIssueTokens(response, refreshToken));
 
-        // 헤더에 Access Token이 존재 및 유효 -> 인증 수행
-        jwtProvider.extractAccessToken(request)
+        // 쿠키에서 Access Token 추출 & 유효성 검사 -> 인증 처리
+        extractCookie(request, "accessToken")
                 .filter(jwtProvider::validateToken)
                 .ifPresent(this::authenticate);
 
@@ -76,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // 1. RefreshToken 유효 및 존재 -> 새로운 Access Token & Refresh Token 재발급
     // 2. DB에 새 Refresh Token 저장 (추후 Redis 대체)
-    // 3. 응답에 Access Token(헤더) & Refresh Token(쿠키) 설정
+    // 3. 응답에 Access Token(쿠키) & Refresh Token(쿠키) 설정
     private void reIssueTokens(HttpServletResponse response, String refreshToken) {
         memberRepository.findByRefreshToken(refreshToken)
                 .ifPresentOrElse(
@@ -90,7 +90,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             memberRepository.save(member);
 
                             // Access Token은 헤더로, Refresh Token은 쿠키로 저장
-                            jwtProvider.setAccessTokenHeader(response, newAccessToken);
+                            jwtProvider.setAccessTokenCookie(response, newAccessToken);
                             jwtProvider.setRefreshTokenCookie(response, newRefreshToken);
                             log.info("AccessToken 및 RefreshToken 재발급 완료");
                         },
@@ -98,13 +98,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
     }
 
-    // HttpOnly Secure 쿠키에서 Refresh Token 추출
-    private Optional<String> extractRefreshTokenFromCookie(HttpServletRequest request) {
+    // HttpOnly Secure 쿠키에서 Token 추출
+    private Optional<String> extractCookie(HttpServletRequest request, String cookieName) {
         if (request.getCookies() == null) {
             return Optional.empty();
         }
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .filter(cookie -> cookieName.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst();
     }
@@ -114,10 +114,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwtProvider.extractEmail(accessToken).ifPresent(email -> {
             memberRepository.findByEmail(email).ifPresentOrElse(
                     member -> {
-                        /*Authentication authentication = new UsernamePasswordAuthenticationToken(
-                                member, null, member.getAuthorities()
-                        );
-                        SecurityContextHolder.getContext().setAuthentication(authentication);*/
                         setAuthentication(member);
                         log.info("사용자 인증 완료: {}", email);
                     },
@@ -125,6 +121,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
         });
     }
+
     //UserDetails 설정
     private void setAuthentication(Member member) {
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()

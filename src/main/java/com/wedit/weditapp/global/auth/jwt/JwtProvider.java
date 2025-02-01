@@ -32,13 +32,10 @@ public class JwtProvider {
     @Value("${jwt.refresh.expiration}")
     private long refreshTokenExpiry; // 만료 시간 : 1209600000 (2주)
 
-    @Value("${jwt.access.header}")
-    private String accessHeader;
-
     private Key key; // 실제 사용할 HMAC용 key 객체
 
     private static final String EMAIL_CLAIM = "email";
-    private static final String BEARER = "Bearer ";
+    private static final String ACCESS_COOKIE_NAME = "accessToken";
     private static final String REFRESH_COOKIE_NAME = "refreshToken";
 
 
@@ -76,41 +73,28 @@ public class JwtProvider {
         return builder.compact();
     }
 
-    // Access Token 헤더에 설정
-    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader(accessHeader, BEARER + accessToken);
-        log.info("Access Token 헤더 설정 완료");
+    // Access Token : HttpOnly, Secure 쿠키로 설정
+    public void setAccessTokenCookie(HttpServletResponse response, String accessToken) {
+        Cookie accessCookie = new Cookie(ACCESS_COOKIE_NAME, accessToken);
+        accessCookie.setHttpOnly(false);  // JavaScript에서 접근 불가능
+        accessCookie.setSecure(false);    // HTTPS 상황에서만 전송
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiry));
+
+        response.addCookie(accessCookie);
+        log.info("AccessToken 쿠키 저장 완료");
     }
 
     // Refresh Token : HttpOnly, Secure 쿠키로 설정
     public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie refreshCookie = new Cookie(REFRESH_COOKIE_NAME, refreshToken);
-        refreshCookie.setHttpOnly(true); // JavaScript에서 접근 불가능
-        refreshCookie.setSecure(true); // HTTPS 환경에서만 전송
-        refreshCookie.setPath("/"); // 모든 경로에서 유효
-        refreshCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiry)); // 만료 시간 설정
+        refreshCookie.setHttpOnly(false); // JavaScript에서 접근 불가능
+        refreshCookie.setSecure(false); // HTTPS 환경에서만 전송
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiry));
 
         response.addCookie(refreshCookie);
         log.info("Refresh Token 쿠키 저장 완료");
-    }
-
-    // HTTP 요청의 Authorization 헤더에서 Access Token 추출
-    public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(accessHeader))
-                .filter(headerValue -> headerValue.startsWith(BEARER))
-                .map(headerValue -> headerValue.substring(BEARER.length()));
-    }
-
-    // 요청 쿠키에서 Refresh Token 추출
-    public Optional<String> extractRefreshTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) {
-            return Optional.empty();
-        }
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> REFRESH_COOKIE_NAME.equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findAny();
     }
 
     // 토큰으로부터 email 클레임 추출
