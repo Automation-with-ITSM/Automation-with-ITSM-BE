@@ -22,6 +22,7 @@ import com.wedit.weditapp.domain.invitation.domain.repository.InvitationReposito
 import com.wedit.weditapp.domain.invitation.dto.request.InvitationCreateRequestDto;
 import com.wedit.weditapp.domain.invitation.dto.request.InvitationUpdateRequestDto;
 import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDto;
+import com.wedit.weditapp.domain.invitation.dto.response.StatisticsDto;
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
 import com.wedit.weditapp.global.error.ErrorCode;
@@ -253,6 +254,9 @@ public class InvitationService {
 		List<ImageResponseDto> images = imageService.getImages(invitation);
 		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
+		invitation.updateDailyVisitors();
+		invitation.updateTotalVisitors();
+
 		return InvitationResponseDto.from(invitation, bankAccounts, images,
 			comments.stream()
 				.map(CommentResponseDto::from)
@@ -264,4 +268,14 @@ public class InvitationService {
 		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
+
+	public StatisticsDto getInvitationStatistics(UserDetails userDetails, Long invitationId) {
+		Member member = getMember(userDetails);
+
+		Invitation invitation = invitationRepository.findById(invitationId)
+			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
+
+		return StatisticsDto.of(invitation, decisionService.getDecisionCounts(invitationId));
+	}
+
 }

@@ -28,7 +28,9 @@ public class S3Service {
 	private String imageFolder;
 
 	public String upload(MultipartFile multipartFile) {
-		String fileName = imageFolder + multipartFile.getOriginalFilename();
+
+		String fileName = imageFolder + generateUniqueFileName(multipartFile.getOriginalFilename());
+		log.info("new file path : {}", fileName);
 
 		if (!(fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(
 			".gif") || fileName.endsWith(".bmp"))) {
@@ -54,7 +56,7 @@ public class S3Service {
 		return amazonS3Client.getUrl(bucket, fileName).toString();
 	}
 
-	//이미지 가져오기(url) => public access 걸어놔서 가져올 수 있을 것임
+	//이미지 가져오기(url) => 사실상 DB에 저장된 Url을 사용하기에 문제 없음
 	public String getImageFileUrl(String fileName) {
 		String filePath = imageFolder + fileName;
 		return amazonS3Client.getUrl(bucket, filePath).toString();
