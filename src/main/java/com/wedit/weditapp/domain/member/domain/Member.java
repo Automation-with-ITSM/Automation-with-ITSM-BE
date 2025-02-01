@@ -40,6 +40,9 @@ public class Member extends BaseTimeEntity {
     @Column(name = "status", nullable = false)
     private MemberStatus status;
 
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
     // Builder를 통해서만 객체를 생성하도록 (일반 생성자는 protected)
     @Builder
     private Member(String email, String name) {
@@ -84,6 +87,11 @@ public class Member extends BaseTimeEntity {
             throw new CommonException(ErrorCode.EMPTY_FIELD);
         }
         this.role = newRole;
+    }
+
+    // Refresh Token 업데이트
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     // 스프링 시큐리티 인증에 필요한 권한 정보 반환
