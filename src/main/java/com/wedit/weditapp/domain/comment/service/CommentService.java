@@ -29,21 +29,29 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final InvitationRepository invitationRepository;
 
+    // 방명록 조회
     public PagedCommentResponseDto findAllCommentsByInvitationId(Long invitationId, int page){
 
-//        boolean existsInvitation = invitationRepository.existById(invitationId);
-//        if(!existsInvitation){
-//            throw new CommonException(ErrorCode.INVITATION_NOT_FOUND);
-//        }
+        // 잘못된 청첩장 id일 경우
+        if (invitationId == null || invitationId <= 0){
+            throw new CommonException(ErrorCode.INVALID_INVITATION_ID);
+        }
 
+        // id에 해당하는 청첩장이 존재하지 않을 경우
+        boolean existsInvitation = invitationRepository.existsById(invitationId);
+        if(!existsInvitation){
+            throw new CommonException(ErrorCode.INVITATION_NOT_FOUND);
+        }
+
+        // 요청한 페이지가 1보다 작은 경우
         if(page < 1){
             throw new CommonException(ErrorCode.INVALID_PAGE_NUMBER);
         }
 
-
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdAt").descending());
         Page<Comment> commentPage = commentRepository.findByInvitationId(invitationId, pageable);
 
+        // 빈 페이지의 경우
         if(commentPage.isEmpty()){
             throw new CommonException(ErrorCode.NO_MORE_COMMENTS);
         }
@@ -58,15 +66,18 @@ public class CommentService {
     }
 
     // 방명록 등록
-    public Comment createComment(CommentCreateRequestDto commentCreateRequestDTO) {
+    public Comment createComment(CommentCreateRequestDto commentCreateRequestDto) {
 
-        Invitation invitation = invitationRepository.findById(commentCreateRequestDTO.getInvitationId())
-                .orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
-
+        // 잘못된 청첩장 id일 경우
+        if (commentCreateRequestDto.getInvitationId() == null || commentCreateRequestDto.getInvitationId() <= 0) {
+            throw new CommonException(ErrorCode.INVALID_INVITATION_ID);
+        }
+        Invitation invitation = invitationRepository.findById(commentCreateRequestDto.getInvitationId())
+                .orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND)); // id에 해당하는 청첩장이 존재하지 않을 경우
 
         Comment comment = Comment.createComment(
-                commentCreateRequestDTO.getName(),
-                commentCreateRequestDTO.getContent(),
+                commentCreateRequestDto.getName(),
+                commentCreateRequestDto.getContent(),
                 invitation
         );
 
