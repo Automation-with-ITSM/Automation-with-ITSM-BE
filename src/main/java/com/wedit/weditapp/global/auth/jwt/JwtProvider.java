@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -31,11 +32,14 @@ public class JwtProvider {
     @Value("${jwt.refresh.expiration}")
     private long refreshTokenExpiry; // 만료 시간 : 1209600000 (2주)
 
+    @Value("${jwt.access.header}")
+    private String accessHeader;
+
     private Key key; // 실제 사용할 HMAC용 key 객체
 
     private static final String EMAIL_CLAIM = "email";
     private static final String BEARER = "Bearer ";
-    private static final String REFRESH_COOKIE_NAME = "refreshToken"; // 쿠키에 저장할 이름
+    private static final String REFRESH_COOKIE_NAME = "refreshToken";
 
 
     // SecretKey 초기화
@@ -50,8 +54,8 @@ public class JwtProvider {
     }
 
     // Refresh Token 생성
-    public String createRefreshToken() {
-        return buildToken(null, "RefreshToken", refreshTokenExpiry);
+    public String createRefreshToken(String email) {
+        return buildToken(email, "RefreshToken", refreshTokenExpiry);
     }
 
     // Access Token + Refresh Token 생성 로직
@@ -72,21 +76,15 @@ public class JwtProvider {
         return builder.compact();
     }
 
-    // AccessToken : JSON Body로 반환
-    public void sendAccessTokenResponse(HttpServletResponse response, String accessToken) {
+    // Access Token 헤더에 설정
+    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        try {
-            response.getWriter().write("{\"accessToken\": \"" + accessToken + "\"}");
-        } catch (Exception e) {
-            log.error("AccessToken JSON 응답 오류: {}", e.getMessage());
-        }
+        response.setHeader(accessHeader, BEARER + accessToken);
+        log.info("Access Token 헤더 설정 완료");
     }
 
     // Refresh Token : HttpOnly, Secure 쿠키로 설정
-    public void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+    public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie refreshCookie = new Cookie(REFRESH_COOKIE_NAME, refreshToken);
         refreshCookie.setHttpOnly(true); // JavaScript에서 접근 불가능
         refreshCookie.setSecure(true); // HTTPS 환경에서만 전송
@@ -94,30 +92,41 @@ public class JwtProvider {
         refreshCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiry)); // 만료 시간 설정
 
         response.addCookie(refreshCookie);
-        log.info("Refresh Token이 쿠키에 저장되었습니다.");
+        log.info("Refresh Token 쿠키 저장 완료");
     }
 
-    // AccessToken에서 이메일 클레임 추출
-    public Optional<String> extractEmail(String accessToken) {
+    // HTTP 요청의 Authorization 헤더에서 Access Token 추출
+    public Optional<String> extractAccessToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(accessHeader))
+                .filter(headerValue -> headerValue.startsWith(BEARER))
+                .map(headerValue -> headerValue.substring(BEARER.length()));
+    }
+
+    // 요청 쿠키에서 Refresh Token 추출
+    public Optional<String> extractRefreshTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> REFRESH_COOKIE_NAME.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findAny();
+    }
+
+    // 토큰으로부터 email 클레임 추출
+    public Optional<String> extractEmail(String token) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith((SecretKey) key)
                     .build()
-                    .parseSignedClaims(accessToken)
+                    .parseSignedClaims(token)
                     .getPayload();
 
             return Optional.ofNullable(claims.get(EMAIL_CLAIM, String.class));
         } catch (JwtException e) {
-            log.error("유효하지 않은 AccessToken입니다. {}", e.getMessage());
+            log.error("토큰에서 email 클레임 추출 실패: {}", e.getMessage());
             return Optional.empty();
         }
-    }
-
-    // HTTP 요청의 Authorization 헤더에서 Bearer Token 추출
-    public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader("Authorization"))
-                .filter(token -> token.startsWith("Bearer "))
-                .map(token -> token.substring(7)); // "Bearer " 제거 후 순수 토큰 반환
     }
 
     // Token 유효성 검증
