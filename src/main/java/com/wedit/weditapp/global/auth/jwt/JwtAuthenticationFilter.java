@@ -61,8 +61,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             memberRepository.save(member);
 
                             // Access Token은 JSON Body로 반환, Refresh Token은 쿠키로 저장
-                            jwtProvider.sendAccessTokenResponse(response, newAccessToken);
-                            jwtProvider.addRefreshTokenCookie(response, newRefreshToken);
+                            jwtProvider.setAccessTokenHeader(response, newAccessToken);
+                            jwtProvider.setRefreshTokenCookie(response, newRefreshToken);
                             log.info("AccessToken 및 RefreshToken 재발급 완료");
                         },
                         () -> log.error("유효하지 않은 RefreshToken으로 재발급 시도")

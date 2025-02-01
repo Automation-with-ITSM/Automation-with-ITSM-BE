@@ -49,7 +49,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 5. Access Token은 JSON Body로 반환, Refresh Token은 HttpOnly Secure Cookie에 저장
         //jwtProvider.sendAccessTokenResponse(response, accessToken);
-        jwtProvider.addRefreshTokenCookie(response, refreshToken);
+        jwtProvider.setRefreshTokenCookie(response, refreshToken);
 
         // 로그인 성공 후 프런트 : `/redirect`로 이동 & 백엔드 : Access Token 보여주기
         if (isFrontendAvailable("http://localhost:5173/redirect")) {
