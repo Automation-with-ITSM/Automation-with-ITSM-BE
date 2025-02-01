@@ -34,8 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+        HttpServletResponse response,
+        FilterChain filterChain) throws ServletException, IOException {
 
         // 슈퍼 토큰 예외 처리 (테스트용)
         String token = request.getHeader("Authorization");
@@ -48,27 +48,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 쿠키에서 Refresh Token 추출 & 유효성 검사 -> 재발급 로직
         extractCookie(request, "refreshToken")
-                .filter(jwtProvider::validateToken)
-                .ifPresent(refreshToken -> reIssueTokens(response, refreshToken));
+            .filter(jwtProvider::validateToken)
+            .ifPresent(refreshToken -> reIssueTokens(response, refreshToken));
 
         // 쿠키에서 Access Token 추출 & 유효성 검사 -> 인증 처리
         extractCookie(request, "accessToken")
-                .filter(jwtProvider::validateToken)
-                .ifPresent(this::authenticate);
+            .filter(jwtProvider::validateToken)
+            .ifPresent(this::authenticate);
 
         filterChain.doFilter(request, response);
     }
 
-
     private void setSuperUserAuthentication() {
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username("superuser")
-                .password("")
-                .roles("ADMIN") // 슈퍼 계정 권한 설정 가능
-                .build();
+            .username("superuser")
+            .password("")
+            .roles("ADMIN") // 슈퍼 계정 권한 설정 가능
+            .build();
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities()
+            userDetails, null, userDetails.getAuthorities()
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -79,23 +78,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 3. 응답에 Access Token(쿠키) & Refresh Token(쿠키) 설정
     private void reIssueTokens(HttpServletResponse response, String refreshToken) {
         memberRepository.findByRefreshToken(refreshToken)
-                .ifPresentOrElse(
-                        member -> {
-                            // 새 Access Token / 새 Refresh Token 생성
-                            String newAccessToken = jwtProvider.createAccessToken(member.getEmail());
-                            String newRefreshToken = jwtProvider.createRefreshToken(member.getEmail());
+            .ifPresentOrElse(
+                member -> {
+                    // 새 Access Token / 새 Refresh Token 생성
+                    String newAccessToken = jwtProvider.createAccessToken(member.getEmail());
+                    String newRefreshToken = jwtProvider.createRefreshToken(member.getEmail());
 
-                            // DB에 새로운 Refresh Token 저장
-                            member.updateRefreshToken(newRefreshToken);
-                            memberRepository.save(member);
+                    // DB에 새로운 Refresh Token 저장
+                    member.updateRefreshToken(newRefreshToken);
+                    memberRepository.save(member);
 
-                            // Access Token은 헤더로, Refresh Token은 쿠키로 저장
-                            jwtProvider.setAccessTokenCookie(response, newAccessToken);
-                            jwtProvider.setRefreshTokenCookie(response, newRefreshToken);
-                            log.info("AccessToken 및 RefreshToken 재발급 완료");
-                        },
-                        () -> log.error("유효하지 않은 RefreshToken으로 재발급 시도")
-                );
+                    // Access Token은 헤더로, Refresh Token은 쿠키로 저장
+                    jwtProvider.setAccessTokenCookie(response, newAccessToken);
+                    jwtProvider.setRefreshTokenCookie(response, newRefreshToken);
+                    log.info("AccessToken 및 RefreshToken 재발급 완료");
+                },
+                () -> log.error("유효하지 않은 RefreshToken으로 재발급 시도")
+            );
     }
 
     // HttpOnly Secure 쿠키에서 Token 추출
@@ -104,20 +103,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return Optional.empty();
         }
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> cookieName.equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst();
+            .filter(cookie -> cookieName.equals(cookie.getName()))
+            .map(Cookie::getValue)
+            .findFirst();
     }
 
     // AccessToken을 사용하여 사용자 인증
     private void authenticate(String accessToken) {
         jwtProvider.extractEmail(accessToken).ifPresent(email -> {
             memberRepository.findByEmail(email).ifPresentOrElse(
-                    member -> {
-                        setAuthentication(member);
-                        log.info("사용자 인증 완료: {}", email);
-                    },
-                    () -> log.error("AccessToken의 이메일 정보와 일치하는 사용자가 없습니다.")
+                member -> {
+                    setAuthentication(member);
+                    log.info("사용자 인증 완료: {}", email);
+                },
+                () -> log.error("AccessToken의 이메일 정보와 일치하는 사용자가 없습니다.")
             );
         });
     }
