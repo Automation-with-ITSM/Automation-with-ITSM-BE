@@ -4,6 +4,8 @@ import com.wedit.weditapp.global.auth.login.handler.OAuth2LoginFailureHandler;
 import com.wedit.weditapp.global.auth.login.handler.OAuth2LoginSuccessHandler;
 import com.wedit.weditapp.global.auth.login.service.CustomOAuth2UserService;
 import com.wedit.weditapp.global.auth.jwt.JwtAuthenticationFilter;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -27,6 +29,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+	@Value("#{'${cors.allowed-origins}'.split(',')}")
+	private String[] allowedOrigins;
+
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
@@ -43,7 +48,6 @@ public class SecurityConfig {
 
 				// 2. 세션 관련 정책 추가 : 세션 방식 사용 X (오직 JWT만 사용)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-
 				.headers(headers ->
 						headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
 				)
@@ -57,6 +61,7 @@ public class SecurityConfig {
 						"/api/decisions",
 						"/api/comments/**")
 						.permitAll()
+						//.anyRequest().permitAll()
 						.anyRequest().authenticated()
 				)
 
@@ -77,11 +82,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(Arrays.asList(
-			"http://localhost:3000",
-			"http://localhost:5173",
-			"http://wedit.site"));
-		configuration.addAllowedOriginPattern("*");
+		configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setExposedHeaders(Arrays.asList("Content-Type", "Authorization", "Authorization-refresh", "accept"));
