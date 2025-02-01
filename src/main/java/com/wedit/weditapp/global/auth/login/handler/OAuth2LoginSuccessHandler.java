@@ -57,8 +57,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         jwtProvider.setRefreshTokenCookie(response, oldRefreshToken);
 
         // 6. 배포되는 서버용 - 원하는 페이지로 리다이렉트
-        log.info("리다이렉트: http://wedit.site/");
-        response.sendRedirect("http://wedit.site/");
+        //log.info("리다이렉트: http://wedit.site/");
+        response.sendRedirect("http://localhost:5173/");
 
         // 6. 로컬테스트용
         //response.setStatus(HttpServletResponse.SC_OK);
