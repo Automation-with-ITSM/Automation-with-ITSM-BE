@@ -135,16 +135,6 @@ public class JwtProvider {
         }
     }
 
-    public void expireCookie(HttpServletResponse response, String cookieName) {
-        Cookie cookie = new Cookie(cookieName, null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        cookie.setHttpOnly(false);
-        cookie.setSecure(false);
-
-        response.addCookie(cookie);
-    }
-
     // Token 유효성 검증
     public boolean validateToken(String token) {
         try {

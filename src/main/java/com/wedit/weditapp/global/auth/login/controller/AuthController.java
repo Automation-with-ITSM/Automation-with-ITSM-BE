@@ -9,6 +9,7 @@ import com.wedit.weditapp.global.response.GlobalResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,47 @@ public class AuthController {
         );
 
         return ResponseEntity.ok(GlobalResponseDto.success(userInfo));
+    }
+
+    @Operation(summary = "사용자 로그아웃", description = "해당 사용자의 Access Token과 Refresh Token을 삭제하여 로그아웃 시킵니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "사용자 정보 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "유효하지 않은 토큰"),
+            @ApiResponse(responseCode = "404", description = "유저를 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<GlobalResponseDto<Map<String, String>>> logout(HttpServletRequest request,
+                                                                         HttpServletResponse response) {
+        // 1. 쿠키에서 Refresh Token 추출
+        String refreshToken = jwtProvider.extractRefreshCookie(request)
+                .orElse(null);
+
+        // 2. Refresh Token이 있다면 DB에서 무효화
+        if (refreshToken != null) {
+            jwtProvider.extractEmail(refreshToken).ifPresent(email -> {
+                memberRepository.findByEmail(email).ifPresent(member -> {
+                    member.updateRefreshToken(null);
+                    memberRepository.save(member);
+                });
+            });
+        }
+
+        // 3) 쿠키 만료 처리 (Access/Refresh Token 둘 다)
+        expireCookie(response, "accessToken");
+        expireCookie(response, "refreshToken");
+
+        // 4) 응답
+        return ResponseEntity.ok(
+                GlobalResponseDto.success(Map.of("message", "로그아웃 성공!"))
+        );
+    }
+
+    private void expireCookie(HttpServletResponse response, String cookieName) {
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 }
 
