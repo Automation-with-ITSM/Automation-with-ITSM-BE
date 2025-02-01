@@ -61,8 +61,8 @@ public class SecurityConfig {
 						"/api/decisions",
 						"/api/comments/**")
 						.permitAll()
-						.anyRequest().permitAll()
-						//.anyRequest().authenticated()
+						//.anyRequest().permitAll()
+						.anyRequest().authenticated()
 				)
 
 				// 4. OAuth2 설정
