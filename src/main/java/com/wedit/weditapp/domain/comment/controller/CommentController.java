@@ -40,7 +40,7 @@ public class CommentController {
     // 특정 청첩장에 방명록 등록 API
     @Operation(summary = "방명록 등록", description = "특정 청첩장에 방명록을 등록합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "방명록 등록 성공"),
+            @ApiResponse(responseCode = "201", description = "방명록 등록 성공"),
             @ApiResponse(responseCode = "404", description = "청첩장을 찾을 수 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
