@@ -30,10 +30,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final MemberRepository memberRepository;
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
+    private static final String SUPER_TOKEN = "super-secret-token"; // 슈퍼 토큰
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        // 슈퍼 토큰 예외 처리 (테스트용)
+        String token = request.getHeader("Authorization");
+        if (token != null && token.equals("Bearer " + SUPER_TOKEN)) {
+            log.warn("Super Token 사용 - 모든 요청 인증 우회");
+            setSuperUserAuthentication();
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 쿠키에 Refresh Token이 존재 및 유효 -> 새로운 Access Token & Refresh Token 재발급
         extractRefreshTokenFromCookie(request)
@@ -46,6 +57,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .ifPresent(this::authenticate);
 
         filterChain.doFilter(request, response);
+    }
+
+
+    private void setSuperUserAuthentication() {
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username("superuser")
+                .password("")
+                .roles("ADMIN") // 슈퍼 계정 권한 설정 가능
+                .build();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     // 1. RefreshToken 유효 및 존재 -> 새로운 Access Token & Refresh Token 재발급
