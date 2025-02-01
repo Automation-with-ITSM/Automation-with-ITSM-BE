@@ -35,12 +35,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Refresh Token이 존재하면 Access Token 재발급 시도
+        // 쿠키에 Refresh Token이 존재 및 유효 -> 새로운 Access Token & Refresh Token 재발급
         extractRefreshTokenFromCookie(request)
                 .filter(jwtProvider::validateToken)
-                .ifPresent(refreshToken -> reIssueAccessToken(response, refreshToken));
+                .ifPresent(thisRefreshToken -> reIssueTokens(response, thisRefreshToken));
 
-        // Access Token이 존재하면 인증 수행
+        // 헤더에 Access Token이 존재 및 유효 -> 인증 수행
         jwtProvider.extractAccessToken(request)
                 .filter(jwtProvider::validateToken)
                 .ifPresent(this::authenticate);
@@ -48,19 +48,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // RefreshToken을 사용하여 AccessToken 재발급
-    private void reIssueAccessToken(HttpServletResponse response, String refreshToken) {
+    // 1. RefreshToken 유효 및 존재 -> 새로운 Access Token & Refresh Token 재발급
+    // 2. DB에 새 Refresh Token 저장 (추후 Redis 대체)
+    // 3. 응답에 Access Token(헤더) & Refresh Token(쿠키) 설정
+    private void reIssueTokens(HttpServletResponse response, String refreshToken) {
         memberRepository.findByRefreshToken(refreshToken)
                 .ifPresentOrElse(
                         member -> {
+                            // 새 Access Token / 새 Refresh Token 생성
                             String newAccessToken = jwtProvider.createAccessToken(member.getEmail());
-                            String newRefreshToken = jwtProvider.createRefreshToken();
+                            String newRefreshToken = jwtProvider.createRefreshToken(member.getEmail());
 
                             // DB에 새로운 Refresh Token 저장
                             member.updateRefreshToken(newRefreshToken);
                             memberRepository.save(member);
 
-                            // Access Token은 JSON Body로 반환, Refresh Token은 쿠키로 저장
+                            // Access Token은 헤더로, Refresh Token은 쿠키로 저장
                             jwtProvider.setAccessTokenHeader(response, newAccessToken);
                             jwtProvider.setRefreshTokenCookie(response, newRefreshToken);
                             log.info("AccessToken 및 RefreshToken 재발급 완료");

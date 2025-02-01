@@ -41,7 +41,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = member.getRefreshToken(); // 추후 Redis 추가할 때 변경
 
         if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
-            refreshToken = jwtProvider.createRefreshToken();
+            //refreshToken = jwtProvider.createRefreshToken();
             member.updateRefreshToken(refreshToken);
             memberRepository.save(member);
             log.info("새 Refresh Token 발급 및 저장 완료"); // 이거 보여주면 안되서 지움

@@ -54,8 +54,8 @@ public class JwtProvider {
     }
 
     // Refresh Token 생성
-    public String createRefreshToken() {
-        return buildToken(null, "RefreshToken", refreshTokenExpiry);
+    public String createRefreshToken(String email) {
+        return buildToken(email, "RefreshToken", refreshTokenExpiry);
     }
 
     // Access Token + Refresh Token 생성 로직
@@ -103,7 +103,7 @@ public class JwtProvider {
     }
 
     // 요청 쿠키에서 Refresh Token 추출
-    public Optional<String> resolveRefreshTokenFromCookie(HttpServletRequest request) {
+    public Optional<String> extractRefreshTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) {
             return Optional.empty();
         }
