@@ -2,7 +2,6 @@ package com.wedit.weditapp.global.auth.jwt;
 
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
-import com.wedit.weditapp.global.auth.login.service.RefreshTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -29,7 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
-    private final RefreshTokenService refreshTokenService;
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
@@ -50,32 +48,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // RefreshToken 유효 및 존재 -> 새로운 Access Token & Refresh Token 재발급
+    // 1. RefreshToken 유효 및 존재 -> 새로운 Access Token & Refresh Token 재발급
+    // 2. DB에 새 Refresh Token 저장 (추후 Redis 대체)
+    // 3. 응답에 Access Token(헤더) & Refresh Token(쿠키) 설정
     private void reIssueTokens(HttpServletResponse response, String refreshToken) {
-        // 1. Refresh Token에서 email 추출
-        jwtProvider.extractEmail(refreshToken).ifPresentOrElse(email -> {
-            // 2. Redis에서 email로 저장된 Refresh Token 조회
-            String storedRefreshToken = refreshTokenService.getRefreshToken(email);
+        memberRepository.findByRefreshToken(refreshToken)
+                .ifPresentOrElse(
+                        member -> {
+                            // 새 Access Token / 새 Refresh Token 생성
+                            String newAccessToken = jwtProvider.createAccessToken(member.getEmail());
+                            String newRefreshToken = jwtProvider.createRefreshToken(member.getEmail());
 
-            // 3. 실제 저장된 토큰과 현재 요청의 토큰이 일치하는지 확인
-            if (refreshToken.equals(storedRefreshToken)) {
-                log.info("[재발급] Redis에 저장된 Refresh Token과 일치 -> 새 토큰 발급 진행");
+                            // DB에 새로운 Refresh Token 저장
+                            member.updateRefreshToken(newRefreshToken);
+                            memberRepository.save(member);
 
-                // 4. 새 Access Token / 새 Refresh Token 생성
-                String newAccessToken = jwtProvider.createAccessToken(email);
-                String newRefreshToken = jwtProvider.createRefreshToken(email);
-
-                // 5. Redis에 새로운 Refresh Token 저장
-                refreshTokenService.saveRefreshToken(email, newRefreshToken);
-
-                // 6. 응답에 새 Access Token(헤더), Refresh Token(쿠키) 설정
-                jwtProvider.setAccessTokenHeader(response, newAccessToken);
-                jwtProvider.setRefreshTokenCookie(response, newRefreshToken);
-                log.info("새 AccessToken 및 RefreshToken 재발급 완료");
-            } else {
-                log.error("[재발급] Redis에 저장된 Refresh Token과 불일치 -> 재발급 불가");
-            }
-        }, () -> log.error("[재발급] Refresh Token에서 email 추출 실패"));
+                            // Access Token은 헤더로, Refresh Token은 쿠키로 저장
+                            jwtProvider.setAccessTokenHeader(response, newAccessToken);
+                            jwtProvider.setRefreshTokenCookie(response, newRefreshToken);
+                            log.info("AccessToken 및 RefreshToken 재발급 완료");
+                        },
+                        () -> log.error("유효하지 않은 RefreshToken으로 재발급 시도")
+                );
     }
 
     // HttpOnly Secure 쿠키에서 Refresh Token 추출
