@@ -8,7 +8,4 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     // 이메일로 회원 찾기
     Optional<Member> findByEmail(String email);
-
-    // RefreshToken으로 회원 찾기
-    Optional<Member> findByRefreshToken(String refreshToken);
 }
