@@ -97,6 +97,28 @@ public class JwtProvider {
         log.info("Refresh Token 쿠키 저장 완료");
     }
 
+    // HttpOnly Secure 쿠키에서 Access Token 추출
+    public Optional<String> extractAccessCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> ACCESS_COOKIE_NAME.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
+    }
+
+    // HttpOnly Secure 쿠키에서 Refresh Token 추출
+    public Optional<String> extractRefreshCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return Optional.empty();
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> REFRESH_COOKIE_NAME.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst();
+    }
+
     // 토큰으로부터 email 클레임 추출
     public Optional<String> extractEmail(String token) {
         try {
@@ -111,6 +133,16 @@ public class JwtProvider {
             log.error("토큰에서 email 클레임 추출 실패: {}", e.getMessage());
             return Optional.empty();
         }
+    }
+
+    public void expireCookie(HttpServletResponse response, String cookieName) {
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(false);
+        cookie.setSecure(false);
+
+        response.addCookie(cookie);
     }
 
     // Token 유효성 검증
