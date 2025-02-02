@@ -79,6 +79,7 @@ public class JwtProvider {
         accessCookie.setHttpOnly(true);  // JavaScript에서 접근 불가능
         accessCookie.setSecure(true);    // HTTPS 상황에서만 전송
         accessCookie.setPath("/");
+        accessCookie.setAttribute("SameSite", "None");
         accessCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiry));
 
         response.addCookie(accessCookie);
@@ -91,6 +92,7 @@ public class JwtProvider {
         refreshCookie.setHttpOnly(true); // JavaScript에서 접근 불가능
         refreshCookie.setSecure(true); // HTTPS 환경에서만 전송
         refreshCookie.setPath("/");
+        refreshCookie.setAttribute("SameSite", "None");
         refreshCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiry));
 
         response.addCookie(refreshCookie);
