@@ -44,7 +44,7 @@ public class SecurityConfig {
 				.formLogin(AbstractHttpConfigurer::disable)
 				.httpBasic(AbstractHttpConfigurer::disable)
 				.csrf(AbstractHttpConfigurer::disable)
-				.cors(Customizer.withDefaults())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
 				// 2. 세션 관련 정책 추가 : 세션 방식 사용 X (오직 JWT만 사용)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
