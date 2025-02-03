@@ -29,8 +29,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	@Value("#{'${cors.allowed-origins}'.split(',')}")
-	private String[] allowedOrigins;
+	//@Value("#{'${cors.allowed-origins}'.split(',')}")
+	//private String[] allowedOrigins;
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;
@@ -82,7 +82,10 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+		//configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
+		configuration.setAllowedOrigins(Arrays.asList(
+				"http://localhost:3000", "http://localhost:5173", "http://localhost:8080",
+				 "https://wedit.site", "https://43.201.85.194.nip.io"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setExposedHeaders(Arrays.asList("Content-Type", "Authorization", "Authorization-refresh", "accept"));
