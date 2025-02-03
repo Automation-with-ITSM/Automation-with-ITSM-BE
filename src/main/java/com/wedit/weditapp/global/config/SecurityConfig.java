@@ -83,7 +83,11 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		//configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "https://wedit.site", "https://43.201.85.194.nip.io"));
+		configuration.setAllowedOriginPatterns(Arrays.asList(
+				"https://wedit.site",
+				"https://43.201.85.194.nip.io",
+				"http://localhost:*"
+		));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setExposedHeaders(Arrays.asList("Content-Type", "Authorization", "Authorization-refresh", "accept"));
