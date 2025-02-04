@@ -88,7 +88,7 @@ public class SecurityConfig {
 				"https://43.201.85.194.nip.io",
 				"http://localhost:*"
 		));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setExposedHeaders(Arrays.asList("Content-Type", "Authorization", "Authorization-refresh", "accept"));
 		configuration.setAllowCredentials(true);
