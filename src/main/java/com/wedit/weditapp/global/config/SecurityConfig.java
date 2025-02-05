@@ -8,6 +8,7 @@ import com.wedit.weditapp.global.auth.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -53,6 +54,7 @@ public class SecurityConfig {
 				)
 				// 3. 권한 설정
 				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // OPTIONS 요청 허용
 						.requestMatchers("/v3/api-docs/**",
 								"/swagger-ui/**",
 								"/oauth2/**",
@@ -86,8 +88,7 @@ public class SecurityConfig {
 		configuration.setAllowedOriginPatterns(Arrays.asList(
 				"https://wedit.site",
 				"https://43.201.85.194.nip.io",
-				"http://localhost:*",
-				"https://wedit.site/my"
+				"http://localhost:*"
 		));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
