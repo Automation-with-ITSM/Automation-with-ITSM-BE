@@ -86,7 +86,8 @@ public class SecurityConfig {
 		configuration.setAllowedOriginPatterns(Arrays.asList(
 				"https://wedit.site",
 				"https://43.201.85.194.nip.io",
-				"http://localhost:*"
+				"http://localhost:*",
+				"https://wedit.site/my"
 		));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
