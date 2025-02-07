@@ -17,6 +17,9 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class InvitationResponseDto {
+
+    private Long id;
+
     private String groom; // 신랑 이름
 
     private String bride; // 신부 이름
@@ -54,7 +57,8 @@ public class InvitationResponseDto {
     private List<CommentResponseDto> comment; // 방명록 리스트
 
     @Builder
-    private InvitationResponseDto(String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
+    private InvitationResponseDto(Long id, String groom, String bride, String groomF, String groomM, String brideF, String brideM, String address, String extraAddress, LocalDate date, LocalTime time, Theme theme, String distribution, boolean guestBookOption, boolean decisionOption, boolean accountOption, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
+        this.id = id;
         this.groom = groom;
         this.bride = bride;
         this.groomF = groomF;
@@ -75,8 +79,9 @@ public class InvitationResponseDto {
         this.comment = comment;
     }
 
-    public static InvitationResponseDto from(Invitation invitation, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
+    public static InvitationResponseDto of(Invitation invitation, List<BankAccountDto> bankAccounts, List<ImageResponseDto> image, List<CommentResponseDto> comment){
         return InvitationResponseDto.builder()
+            .id(invitation.getId())
             .groom(invitation.getGroom())
             .bride(invitation.getBride())
             .groomF(invitation.getGroomF())
