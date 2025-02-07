@@ -31,7 +31,8 @@ import java.util.Arrays;
 public class SecurityConfig {
 
 	//@Value("#{'${cors.allowed-origins}'.split(',')}")
-	//private String[] allowedOrigins;
+	/*@Value("${cors.allowed-origins}")
+	private String[] allowedOrigins;*/
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;
@@ -66,14 +67,12 @@ public class SecurityConfig {
 						//.anyRequest().permitAll()
 						.anyRequest().authenticated()
 				)
-
 				// 4. OAuth2 설정
 				.oauth2Login(oauth2 -> oauth2
 						.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
 						.successHandler(oAuth2LoginSuccessHandler)
 						.failureHandler(oAuth2LoginFailureHandler)
 				)
-
 				// 5. JWT 필터 등록
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -85,12 +84,15 @@ public class SecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 
 		//configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
-		configuration.setAllowedOriginPatterns(Arrays.asList(
-				"https://wedit.site",
-				"https://43.201.85.194.nip.io",
-				"http://localhost:*"
-		));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+		configuration.setAllowedOrigins(Arrays.asList(
+			"http://localhost:3000",
+			"http://localhost:5173",
+			"http://localhost:8080",
+			"https://wedit.site",
+			"https://43.201.85.194.nip.io",
+			"https://wedit.site/oauth/callback/kakao"
+			));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setExposedHeaders(Arrays.asList("Content-Type", "Authorization", "Authorization-refresh", "accept"));
 		configuration.setAllowCredentials(true);
