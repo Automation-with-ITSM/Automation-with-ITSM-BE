@@ -102,7 +102,7 @@ public class InvitationService {
 		List<ImageResponseDto> images = imageService.getImages(invitation);
 		List<Comment> comments = commentRepository.findByInvitation(invitation);
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images,
+		return InvitationResponseDto.of(invitation, bankAccounts, images,
 			comments.stream()
 				.map(CommentResponseDto::from)
 				.collect(Collectors.toList()));
@@ -114,7 +114,7 @@ public class InvitationService {
 		List<Invitation> invitations = invitationRepository.findByMemberIdOrderByCreatedAtAsc(member.getId());
 
 		return invitations.stream()
-				.map(invitation -> InvitationResponseDto.from(
+				.map(invitation -> InvitationResponseDto.of(
 						invitation,
 						bankAccountService.getBankAccounts(invitation),
 						imageService.getImages(invitation),
@@ -257,7 +257,7 @@ public class InvitationService {
 		invitation.updateDailyVisitors();
 		invitation.updateTotalVisitors();
 
-		return InvitationResponseDto.from(invitation, bankAccounts, images,
+		return InvitationResponseDto.of(invitation, bankAccounts, images,
 			comments.stream()
 				.map(CommentResponseDto::from)
 				.collect(Collectors.toList()));
