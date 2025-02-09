@@ -191,7 +191,7 @@ public class InvitationService {
 		// URL 생성
 		if (invitation.getDistribution() == null) {
 			String uniqueCode = invitation.getUniqueId();// 고유 코드 생성
-			String generatedUrl = "https://wedit.site/invitations/" + uniqueCode;
+			String generatedUrl = "https://wedit.site/wedding-invitation/" + uniqueCode;
 
 			// URL 저장
 			invitation.updateUrl(generatedUrl);
