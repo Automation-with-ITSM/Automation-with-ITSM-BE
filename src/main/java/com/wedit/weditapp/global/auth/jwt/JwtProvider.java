@@ -34,6 +34,9 @@ public class JwtProvider {
 
     private Key key; // 실제 사용할 HMAC용 key 객체
 
+    @Value("${cookie-domain}")
+    private String cookieDomain;
+
     private static final String EMAIL_CLAIM = "email";
     private static final String ACCESS_COOKIE_NAME = "accessToken";
     private static final String REFRESH_COOKIE_NAME = "refreshToken";
@@ -61,10 +64,10 @@ public class JwtProvider {
         Date expiry = new Date(now.getTime() + expiryTime);
 
         JwtBuilder builder = Jwts.builder()
-                .subject(subject)
-                .issuedAt(now)
-                .expiration(expiry)
-                .signWith(key, SignatureAlgorithm.HS256);
+            .subject(subject)
+            .issuedAt(now)
+            .expiration(expiry)
+            .signWith(key, SignatureAlgorithm.HS256);
 
         if (email != null) {
             builder.claim(EMAIL_CLAIM, email);
@@ -80,6 +83,7 @@ public class JwtProvider {
         accessCookie.setSecure(true);    // HTTPS 상황에서만 전송
         accessCookie.setPath("/");
         accessCookie.setAttribute("SameSite", "None");
+        accessCookie.setDomain(cookieDomain);
         accessCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiry));
 
         response.addCookie(accessCookie);
@@ -93,6 +97,7 @@ public class JwtProvider {
         refreshCookie.setSecure(true); // HTTPS 환경에서만 전송
         refreshCookie.setPath("/");
         refreshCookie.setAttribute("SameSite", "None");
+        refreshCookie.setDomain(cookieDomain);
         refreshCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiry));
 
         response.addCookie(refreshCookie);
@@ -105,9 +110,9 @@ public class JwtProvider {
             return Optional.empty();
         }
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> ACCESS_COOKIE_NAME.equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst();
+            .filter(cookie -> ACCESS_COOKIE_NAME.equals(cookie.getName()))
+            .map(Cookie::getValue)
+            .findFirst();
     }
 
     // HttpOnly Secure 쿠키에서 Refresh Token 추출
@@ -116,19 +121,19 @@ public class JwtProvider {
             return Optional.empty();
         }
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> REFRESH_COOKIE_NAME.equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst();
+            .filter(cookie -> REFRESH_COOKIE_NAME.equals(cookie.getName()))
+            .map(Cookie::getValue)
+            .findFirst();
     }
 
     // 토큰으로부터 email 클레임 추출
     public Optional<String> extractEmail(String token) {
         try {
             Claims claims = Jwts.parser()
-                    .verifyWith((SecretKey) key)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+                .verifyWith((SecretKey) key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
 
             return Optional.ofNullable(claims.get(EMAIL_CLAIM, String.class));
         } catch (JwtException e) {
@@ -142,9 +147,9 @@ public class JwtProvider {
         try {
             // 토큰 파싱 -> 에러 없으면 유효
             Jwts.parser()
-                    .verifyWith((SecretKey) key)
-                    .build()
-                    .parseSignedClaims(token);
+                .verifyWith((SecretKey) key)
+                .build()
+                .parseSignedClaims(token);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.error("잘못된 JWT 서명 : {}", e.getMessage());
