@@ -3,6 +3,7 @@ package com.wedit.weditapp.global.auth.login.controller;
 import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
 import com.wedit.weditapp.global.auth.jwt.JwtProvider;
+import com.wedit.weditapp.global.auth.login.service.RefreshTokenService;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;
 import com.wedit.weditapp.global.response.GlobalResponseDto;
@@ -30,6 +31,7 @@ public class AuthController {
 
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Operation(summary = "사용자 정보 갱신", description = "쿠키에 들어있는 Access Token을 이용하여 사용자 정보를 가져옵니다.")
     @ApiResponses(value = {
@@ -80,14 +82,10 @@ public class AuthController {
         String refreshToken = jwtProvider.extractRefreshCookie(request)
                 .orElse(null);
 
-        // 2. Refresh Token이 있다면 DB에서 무효화
+        // 2. Refresh Token이 있다면 Redis에 저장된 토큰 삭제 (로그아웃 처리)
         if (refreshToken != null) {
-            jwtProvider.extractEmail(refreshToken).ifPresent(email -> {
-                memberRepository.findByEmail(email).ifPresent(member -> {
-                    member.updateRefreshToken(null);
-                    memberRepository.save(member);
-                });
-            });
+            jwtProvider.extractEmail(refreshToken).ifPresent(refreshTokenService::deleteRefreshToken
+            );
         }
 
         // 3) 쿠키 만료 처리 (Access/Refresh Token 둘 다)

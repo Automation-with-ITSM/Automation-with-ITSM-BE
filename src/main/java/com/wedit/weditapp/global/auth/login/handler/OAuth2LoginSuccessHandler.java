@@ -4,6 +4,7 @@ import com.wedit.weditapp.domain.member.domain.Member;
 import com.wedit.weditapp.domain.member.domain.repository.MemberRepository;
 import com.wedit.weditapp.global.auth.login.domain.CustomOAuth2User;
 import com.wedit.weditapp.global.auth.jwt.JwtProvider;
+import com.wedit.weditapp.global.auth.login.service.RefreshTokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import java.net.URL;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -36,25 +38,20 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("로그인 성공했으나 DB에 회원 정보가 없음: " + email));
 
-        // 3. Refresh Token 검사 및 재발급
-        String oldRefreshToken = member.getRefreshToken();
-        boolean needNewRefresh = (oldRefreshToken == null || !jwtProvider.validateToken(oldRefreshToken));
-
-        if (needNewRefresh) {
-            String newRefreshToken = jwtProvider.createRefreshToken(member.getEmail());
-            member.updateRefreshToken(newRefreshToken);
-            memberRepository.save(member);
-
-            oldRefreshToken = newRefreshToken; // 갱신
+        // 3. Redis에 저장된 Refresh Token 조회 및 유효성 검사 후 재발급
+        String refreshToken = refreshTokenService.getRefreshToken(email);
+        if (refreshToken == null || !jwtProvider.validateToken(refreshToken)) {
+            refreshToken = jwtProvider.createRefreshToken(email);
+            refreshTokenService.saveRefreshToken(email, refreshToken);
             log.info("Refresh Token이 없거나 만료되어, 새로 발급했습니다.");
         }
 
         // 4. Access Token 생성
-        String newAccessToken = jwtProvider.createAccessToken(member.getEmail());
+        String newAccessToken = jwtProvider.createAccessToken(email);
 
         // 5. Access Token -> 응답 헤더, Refresh Token -> HttpOnly Cookie
         jwtProvider.setAccessTokenCookie(response, newAccessToken);
-        jwtProvider.setRefreshTokenCookie(response, oldRefreshToken);
+        jwtProvider.setRefreshTokenCookie(response, refreshToken);
 
         // 6. 배포되는 서버용 - 원하는 페이지로 리다이렉트
         log.info("리다이렉트: https://wedit.site/");
