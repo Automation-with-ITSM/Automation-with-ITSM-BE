@@ -205,6 +205,7 @@ public class InvitationService {
 	// 청첩장 삭제
 	public void deleteInvitation(UserDetails userDetails, Long invitationId) {
 		Member member = getMember(userDetails);
+
 		// 청첩장 조회
 		Invitation invitation = invitationRepository.findByIdAndMember(invitationId, member)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
