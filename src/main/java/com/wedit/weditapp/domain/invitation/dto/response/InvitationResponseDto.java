@@ -1,6 +1,6 @@
 package com.wedit.weditapp.domain.invitation.dto.response;
 
-import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
+import com.wedit.weditapp.domain.bankAccount.dto.BankAccountDto;
 import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;
 import com.wedit.weditapp.domain.image.dto.response.ImageResponseDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;

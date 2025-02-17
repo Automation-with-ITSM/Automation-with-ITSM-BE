@@ -7,8 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
-import com.wedit.weditapp.domain.bankAccounts.service.BankAccountService;
+import com.wedit.weditapp.domain.bankAccount.dto.BankAccountDto;
+import com.wedit.weditapp.domain.bankAccount.service.BankAccountService;
 import com.wedit.weditapp.domain.comment.domain.Comment;
 import com.wedit.weditapp.domain.comment.domain.repository.CommentRepository;
 import com.wedit.weditapp.domain.comment.dto.response.CommentResponseDto;

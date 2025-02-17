@@ -1,13 +1,13 @@
-package com.wedit.weditapp.domain.bankAccounts.service;
+package com.wedit.weditapp.domain.bankAccount.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
-import com.wedit.weditapp.domain.bankAccounts.domain.repository.BankAccountRepository;
-import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
+import com.wedit.weditapp.domain.bankAccount.domain.BankAccount;
+import com.wedit.weditapp.domain.bankAccount.domain.repository.BankAccountRepository;
+import com.wedit.weditapp.domain.bankAccount.dto.BankAccountDto;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.global.error.ErrorCode;
 import com.wedit.weditapp.global.error.exception.CommonException;

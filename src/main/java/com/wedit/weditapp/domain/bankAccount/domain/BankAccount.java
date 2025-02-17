@@ -1,4 +1,4 @@
-package com.wedit.weditapp.domain.bankAccounts.domain;
+package com.wedit.weditapp.domain.bankAccount.domain;
 
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.AccountSide;

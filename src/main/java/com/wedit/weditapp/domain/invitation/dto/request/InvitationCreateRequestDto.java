@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
+import com.wedit.weditapp.domain.bankAccount.dto.BankAccountDto;
 import com.wedit.weditapp.domain.shared.Theme;
 
 @Getter

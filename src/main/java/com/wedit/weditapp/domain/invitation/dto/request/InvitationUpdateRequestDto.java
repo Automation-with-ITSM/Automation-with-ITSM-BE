@@ -1,7 +1,6 @@
 package com.wedit.weditapp.domain.invitation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import com.wedit.weditapp.domain.bankAccounts.dto.BankAccountDto;
+import com.wedit.weditapp.domain.bankAccount.dto.BankAccountDto;
 import com.wedit.weditapp.domain.shared.Theme;
 
 @Getter
