@@ -1,7 +1,6 @@
 package com.wedit.weditapp.domain.invitation.service;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,18 +29,28 @@ import com.wedit.weditapp.global.error.exception.CommonException;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class InvitationService {
+
 	private final InvitationRepository invitationRepository;
+
 	private final ImageService imageService;
+
 	private final MemberRepository memberRepository;
+
 	private final BankAccountService bankAccountService;
+
 	private final CommentService commentService;
+
 	private final DecisionService decisionService;
+
 	private final CommentRepository commentRepository;
+
 	private static final int MAX_INVITATIONS = 10;
 
 
@@ -111,6 +120,7 @@ public class InvitationService {
 	// 청첩장 목록 조회 (생성일 기준 오름차순)
 	public List<InvitationResponseDto> getMemberInvitations(UserDetails userDetails) {
 		Member member = getMember(userDetails);
+
 		List<Invitation> invitations = invitationRepository.findByMemberIdOrderByCreatedAtAsc(member.getId());
 
 		return invitations.stream()
@@ -158,7 +168,7 @@ public class InvitationService {
 		// 계좌 정보 업데이트 / isAccountOption이 false로 변경될 경우 계좌 정보 삭제
 		if (updateRequest.isAccountOption() && updateRequest.getBankAccounts() != null) {
 			bankAccountService.updateBankAccount(updateRequest.getBankAccounts(), invitation);
-		}else if (!updateRequest.isAccountOption()) {
+		} else if (!updateRequest.isAccountOption()) {
 			bankAccountService.deleteBankAccount(invitation);
 		}
 
@@ -195,7 +205,8 @@ public class InvitationService {
 
 			// URL 저장
 			invitation.updateUrl(generatedUrl);
-			System.out.println("생성된 url = " + invitation.getDistribution());
+			log.info("생성된 url : {}", generatedUrl);
+
 			invitationRepository.save(invitation);
 		}
 
@@ -232,8 +243,10 @@ public class InvitationService {
 		Long memberId = member.getId();
 
 		List<Invitation> invitations = invitationRepository.findByMemberIdOrderByCreatedAtAsc(memberId);
+
 		if (invitations.size() > MAX_INVITATIONS) {
 			int excessCount = invitations.size() - MAX_INVITATIONS;
+
 			List<Invitation> excessInvitations = invitations.subList(0, excessCount);
 			List<Long> excessInvitationIds = excessInvitations.stream()
 					.map(Invitation::getId)
@@ -266,17 +279,17 @@ public class InvitationService {
 
 	// 멤버 찾기
 	private Member getMember(UserDetails userDetails) {
+
 		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}
 
 	public StatisticsDto getInvitationStatistics(UserDetails userDetails, Long invitationId) {
-		Member member = getMember(userDetails);
+		//Member member = getMember(userDetails);
 
 		Invitation invitation = invitationRepository.findById(invitationId)
 			.orElseThrow(() -> new CommonException(ErrorCode.INVITATION_NOT_FOUND));
 
 		return StatisticsDto.of(invitation, decisionService.getDecisionCounts(invitationId));
 	}
-
 }
