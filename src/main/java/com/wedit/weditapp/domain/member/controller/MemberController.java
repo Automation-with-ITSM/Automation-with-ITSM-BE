@@ -3,8 +3,6 @@ package com.wedit.weditapp.domain.member.controller;
 import com.wedit.weditapp.domain.invitation.dto.response.InvitationResponseDto;
 import com.wedit.weditapp.domain.invitation.dto.response.StatisticsDto;
 import com.wedit.weditapp.domain.invitation.service.InvitationService;
-import com.wedit.weditapp.global.error.ErrorCode;
-import com.wedit.weditapp.global.error.exception.CommonException;
 import com.wedit.weditapp.global.response.GlobalResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,6 +34,7 @@ public class MemberController {
     public ResponseEntity<GlobalResponseDto<List<InvitationResponseDto>>> getMemberInvitations(
             @AuthenticationPrincipal UserDetails userDetails) {
         List<InvitationResponseDto> invitations = invitationService.getMemberInvitations(userDetails);
+
         return ResponseEntity.status(HttpStatus.OK).body(GlobalResponseDto.success(invitations));
     }
 

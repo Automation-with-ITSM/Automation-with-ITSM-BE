@@ -34,6 +34,7 @@ public class CommentController {
             @RequestParam(defaultValue = "1") int page){
 
         PagedCommentResponseDto response = commentService.findAllCommentsByInvitationId(invitationId, page);
+
         return ResponseEntity.status(HttpStatus.OK).body(GlobalResponseDto.success(response));
     }
 

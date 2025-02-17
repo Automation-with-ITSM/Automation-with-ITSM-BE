@@ -1,6 +1,6 @@
-package com.wedit.weditapp.domain.bankAccounts.dto;
+package com.wedit.weditapp.domain.bankAccount.dto;
 
-import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
+import com.wedit.weditapp.domain.bankAccount.domain.BankAccount;
 import com.wedit.weditapp.domain.shared.AccountSide;
 
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class BankAccountDto {
+
 	@NotBlank(message = "side cannot be blank")
 	private AccountSide side;  // 신랑/신부 구분
 

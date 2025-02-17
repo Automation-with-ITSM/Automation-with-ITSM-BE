@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageResponseDto {
 	private String url;
-
 	private int location;
 
 	@Builder

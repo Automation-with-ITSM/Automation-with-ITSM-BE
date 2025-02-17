@@ -65,5 +65,4 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.valueOf(errorCode.getStatus()))
 			.body(GlobalResponseDto.fail(errorCode, errorMessage));
 	}
-
 }

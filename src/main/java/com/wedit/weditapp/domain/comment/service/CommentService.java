@@ -61,8 +61,6 @@ public class CommentService {
 
         // 필요한 정보만으로 DTO 생성
         return PagedCommentResponseDto.of(commentDTOPage, commentPage.isLast(), page);
-
-
     }
 
     // 방명록 등록

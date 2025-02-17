@@ -75,6 +75,7 @@ public class ImageService {
 			} catch (Exception e) {
 				throw new CommonException(ErrorCode.IMAGE_UPLOAD_FAILED);
 			}
+
 			imageRepository.delete(image); // DB에서 이미지 삭제
 		});
 

@@ -1,9 +1,9 @@
-package com.wedit.weditapp.domain.bankAccounts.domain.repository;
+package com.wedit.weditapp.domain.bankAccount.domain.repository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.wedit.weditapp.domain.bankAccounts.domain.BankAccount;
+import com.wedit.weditapp.domain.bankAccount.domain.BankAccount;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 import com.wedit.weditapp.domain.shared.AccountSide;
 

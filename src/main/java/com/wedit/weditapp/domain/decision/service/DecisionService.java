@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DecisionService {
 
     private final DecisionRepository decisionRepository;
-
     private final InvitationRepository invitationRepository;
 
     // 특정 청첩장의 참석의사 누계 조회
