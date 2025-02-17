@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
     private final RefreshTokenService refreshTokenService;
-
     private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     @Override
@@ -80,6 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (request.getCookies() == null) {
             return Optional.empty();
         }
+
         return Arrays.stream(request.getCookies())
             .filter(cookie -> cookieName.equals(cookie.getName()))
             .map(Cookie::getValue)

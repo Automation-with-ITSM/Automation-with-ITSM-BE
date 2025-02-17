@@ -3,7 +3,6 @@ package com.wedit.weditapp.domain.comment.domain.repository;
 import java.util.List;
 
 import com.wedit.weditapp.domain.comment.domain.Comment;
-import com.wedit.weditapp.domain.image.domain.Image;
 import com.wedit.weditapp.domain.invitation.domain.Invitation;
 
 import org.springframework.data.domain.Page;

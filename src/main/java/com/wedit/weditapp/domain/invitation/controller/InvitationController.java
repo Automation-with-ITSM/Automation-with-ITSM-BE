@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +50,7 @@ public class InvitationController {
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitation(
 		@PathVariable Long invitationId,
 		@AuthenticationPrincipal UserDetails userDetail){
+
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(invitationService.getInvitation(userDetail, invitationId)));
 	}
@@ -62,7 +62,9 @@ public class InvitationController {
 		@RequestPart("images") List<MultipartFile> newImages,
 		@Valid @RequestPart("content") InvitationUpdateRequestDto updateRequest,
 		@AuthenticationPrincipal UserDetails userDetail) {
+
 		invitationService.updateInvitation(userDetail, invitationId, updateRequest, newImages);
+
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success());
 	}
@@ -72,7 +74,9 @@ public class InvitationController {
 	public ResponseEntity<GlobalResponseDto<String>> generateInvitationUrl(
 		@PathVariable Long invitationId,
 		@AuthenticationPrincipal UserDetails userDetail) {
+
 		String url = invitationService.generateAndSaveInvitationUrl(userDetail, invitationId);
+
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(url));
 	}
@@ -82,7 +86,9 @@ public class InvitationController {
 	public ResponseEntity<GlobalResponseDto<Void>> deleteInvitation(
 		@PathVariable Long invitationId,
 		@AuthenticationPrincipal UserDetails userDetail) {
+
 		invitationService.deleteInvitation(userDetail, invitationId); // 서비스 호출
+
 		return ResponseEntity.status(HttpStatus.OK) // HTTP 204 No Content
 			.body(GlobalResponseDto.success());
 	}
@@ -91,7 +97,9 @@ public class InvitationController {
 	@Operation(summary = "비회원 청첩장 조회", description = "UUID 기반으로 청첩장 조회")
 	public ResponseEntity<GlobalResponseDto<InvitationResponseDto>> getInvitationForGuest(
 		@PathVariable String uniqueId) {
+
 		InvitationResponseDto response = invitationService.getInvitationForGuest(uniqueId);
+
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(GlobalResponseDto.success(response));
 	}

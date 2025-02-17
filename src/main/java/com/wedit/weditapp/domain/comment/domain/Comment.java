@@ -42,5 +42,4 @@ public class Comment extends BaseTimeEntity {
                 .invitation(invitation)
                 .build();
     }
-
 }

@@ -38,17 +38,11 @@ import lombok.extern.slf4j.Slf4j;
 public class InvitationService {
 
 	private final InvitationRepository invitationRepository;
-
 	private final ImageService imageService;
-
 	private final MemberRepository memberRepository;
-
 	private final BankAccountService bankAccountService;
-
 	private final CommentService commentService;
-
 	private final DecisionService decisionService;
-
 	private final CommentRepository commentRepository;
 
 	private static final int MAX_INVITATIONS = 10;
@@ -279,7 +273,6 @@ public class InvitationService {
 
 	// 멤버 찾기
 	private Member getMember(UserDetails userDetails) {
-
 		return memberRepository.findByEmail(userDetails.getUsername())
 			.orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND));
 	}

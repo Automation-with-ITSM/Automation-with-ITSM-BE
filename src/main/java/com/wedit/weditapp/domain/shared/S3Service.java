@@ -53,23 +53,27 @@ public class S3Service {
 		} catch (IOException e) {
 			throw new RuntimeException("파일 업로드 중 오류 발생", e);
 		}
+
 		return amazonS3Client.getUrl(bucket, fileName).toString();
 	}
 
 	//이미지 가져오기(url) => 사실상 DB에 저장된 Url을 사용하기에 문제 없음
 	public String getImageFileUrl(String fileName) {
 		String filePath = imageFolder + fileName;
+
 		return amazonS3Client.getUrl(bucket, filePath).toString();
 	}
 
 	//파일 이름 중복 방지 코드
 	private String generateUniqueFileName(String originalFilename) {
 		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+
 		return UUID.randomUUID() + extension; // 고유 파일 이름 생성
 	}
 	//검증로직 필요하면 사용 가능
 	private void validateFileFormat(MultipartFile multipartFile) {
 		String contentType = multipartFile.getContentType();
+
 		if (contentType == null || !contentType.startsWith("image/")) {
 			throw new IllegalArgumentException("지원하지 않는 파일 형식입니다.");
 		}

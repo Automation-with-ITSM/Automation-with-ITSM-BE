@@ -19,6 +19,7 @@ import io.swagger.v3.oas.models.servers.Server;
 	version = "v1.0.0"))
 @Configuration
 public class SwaggerConfig {
+
 	@Bean
 	public OpenAPI openAPI() {
 		SecurityScheme securityScheme = getSecurityScheme();

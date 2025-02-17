@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class BankAccountDto {
+
 	@NotBlank(message = "side cannot be blank")
 	private AccountSide side;  // 신랑/신부 구분
 

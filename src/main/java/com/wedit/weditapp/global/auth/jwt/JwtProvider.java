@@ -32,10 +32,10 @@ public class JwtProvider {
     @Value("${jwt.refresh.expiration}")
     private long refreshTokenExpiry; // 만료 시간 : 1209600000 (2주)
 
-    private Key key; // 실제 사용할 HMAC용 key 객체
-
     /*@Value("${cookie-domain}")
     private String cookieDomain;*/
+
+    private Key key; // 실제 사용할 HMAC용 key 객체
 
     private static final String EMAIL_CLAIM = "email";
     private static final String ACCESS_COOKIE_NAME = "accessToken";
@@ -79,6 +79,7 @@ public class JwtProvider {
     // Access Token : HttpOnly, Secure 쿠키로 설정
     public void setAccessTokenCookie(HttpServletResponse response, String accessToken) {
         Cookie accessCookie = new Cookie(ACCESS_COOKIE_NAME, accessToken);
+
         accessCookie.setHttpOnly(true);  // JavaScript에서 접근 불가능
         accessCookie.setSecure(true);    // HTTPS 상황에서만 전송
         accessCookie.setPath("/");
@@ -94,6 +95,7 @@ public class JwtProvider {
     // Refresh Token : HttpOnly, Secure 쿠키로 설정
     public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie refreshCookie = new Cookie(REFRESH_COOKIE_NAME, refreshToken);
+
         refreshCookie.setHttpOnly(true); // JavaScript에서 접근 불가능
         refreshCookie.setSecure(true); // HTTPS 환경에서만 전송
         refreshCookie.setPath("/");
@@ -111,6 +113,7 @@ public class JwtProvider {
         if (request.getCookies() == null) {
             return Optional.empty();
         }
+
         return Arrays.stream(request.getCookies())
             .filter(cookie -> ACCESS_COOKIE_NAME.equals(cookie.getName()))
             .map(Cookie::getValue)
@@ -122,6 +125,7 @@ public class JwtProvider {
         if (request.getCookies() == null) {
             return Optional.empty();
         }
+
         return Arrays.stream(request.getCookies())
             .filter(cookie -> REFRESH_COOKIE_NAME.equals(cookie.getName()))
             .map(Cookie::getValue)
@@ -140,6 +144,7 @@ public class JwtProvider {
             return Optional.ofNullable(claims.get(EMAIL_CLAIM, String.class));
         } catch (JwtException e) {
             log.error("토큰에서 email 클레임 추출 실패: {}", e.getMessage());
+
             return Optional.empty();
         }
     }
@@ -152,7 +157,9 @@ public class JwtProvider {
                 .verifyWith((SecretKey) key)
                 .build()
                 .parseSignedClaims(token);
+
             return true;
+
         } catch (SecurityException | MalformedJwtException e) {
             log.error("잘못된 JWT 서명 : {}", e.getMessage());
             throw new CommonException(ErrorCode.INVALID_JWT_SIGNATURE);
