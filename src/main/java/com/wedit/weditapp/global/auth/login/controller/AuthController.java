@@ -96,7 +96,7 @@ public class AuthController {
 
     private void expireCookie(HttpServletResponse response, String cookieName) {
         Cookie cookie = new Cookie(cookieName, null);
-        cookie.setDomain("api.wedit.site");
+        cookie.setDomain(".wedit.site");
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
