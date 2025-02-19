@@ -30,9 +30,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	// @Value("#{'${cors.allowed-origins}'.split(',')}")
-	// private String[] allowedOrigins;
-
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
@@ -63,7 +60,6 @@ public class SecurityConfig {
 						"/api/decisions",
 						"/api/comments/**")
 						.permitAll()
-						//.anyRequest().permitAll()
 						.anyRequest().authenticated()
 				)
 				// 4. OAuth2 설정
@@ -82,14 +78,14 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		//configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 		configuration.setAllowedOrigins(Arrays.asList(
 			"http://localhost:3000",
 			"http://localhost:5173",
 			"http://localhost:8080",
 			"https://wedit.site",
-			"https://43.201.85.194.nip.io",
-			"https://wedit.site/oauth/callback/kakao"
+			"https://wedit.site/oauth/callback/kakao",
+			"https://api.wedit.site",
+			"https://api.wedit.site/oauth/callback/kakao"
 		));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
