@@ -3,7 +3,6 @@ package com.wedit.weditapp.domain.invitation.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,9 +112,7 @@ public class InvitationService {
 	}
 
 	// 청첩장 목록 조회 (생성일 기준 오름차순)
-	@Cacheable(value = "memberInvitations", key = "#userDetails.username", unless = "#result == null")
 	public List<InvitationResponseDto> getMemberInvitations(UserDetails userDetails) {
-		log.info("DB에서 청첩장 목록 조회 실행"); // 캐시가 적용되지 않은 경우에만 로그 출력
 		Member member = getMember(userDetails);
 
 		List<Invitation> invitations = invitationRepository.findByMemberIdOrderByCreatedAtAsc(member.getId());
