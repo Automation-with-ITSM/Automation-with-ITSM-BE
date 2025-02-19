@@ -85,7 +85,7 @@ public class JwtProvider {
         accessCookie.setPath("/");
         accessCookie.setAttribute("SameSite", "None");
         //accessCookie.setDomain(cookieDomain);
-        accessCookie.setDomain("43.201.85.194.nip.io");
+        //accessCookie.setDomain("43.201.85.194.nip.io");
         accessCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiry));
 
         response.addCookie(accessCookie);
@@ -101,7 +101,7 @@ public class JwtProvider {
         refreshCookie.setPath("/");
         refreshCookie.setAttribute("SameSite", "None");
         //refreshCookie.setDomain(cookieDomain);
-        refreshCookie.setDomain("43.201.85.194.nip.io");
+        //refreshCookie.setDomain("43.201.85.194.nip.io");
         refreshCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiry));
 
         response.addCookie(refreshCookie);
