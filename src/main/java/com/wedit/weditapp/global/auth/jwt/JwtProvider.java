@@ -84,8 +84,7 @@ public class JwtProvider {
         accessCookie.setSecure(true);    // HTTPS 상황에서만 전송
         accessCookie.setPath("/");
         accessCookie.setAttribute("SameSite", "None");
-        //accessCookie.setDomain(cookieDomain);
-        accessCookie.setDomain("43.201.85.194.nip.io");
+        accessCookie.setDomain("api.wedit.site");
         accessCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiry));
 
         response.addCookie(accessCookie);
@@ -100,8 +99,7 @@ public class JwtProvider {
         refreshCookie.setSecure(true); // HTTPS 환경에서만 전송
         refreshCookie.setPath("/");
         refreshCookie.setAttribute("SameSite", "None");
-        //refreshCookie.setDomain(cookieDomain);
-        refreshCookie.setDomain("43.201.85.194.nip.io");
+        refreshCookie.setDomain("api.wedit.site");
         refreshCookie.setMaxAge((int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiry));
 
         response.addCookie(refreshCookie);
