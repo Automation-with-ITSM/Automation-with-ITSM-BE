@@ -28,7 +28,7 @@
     <td align="center"><img src="https://github.com/cherry-p0p.png" width="160"></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/cherry-p0p">최리원</td>
+    <td align="center"><a href="https://github.com/cherry-p0p">채리원</td>
   </tr>
     <tr>
     <td align="center">Project Manager / PO</td>
