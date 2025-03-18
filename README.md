@@ -59,9 +59,9 @@
     <td align="center"><img src="https://github.com/rhdmschdl.png" width="160"></td>
   </tr>
   <tr>
+    <td align="center">청첩장/분석 페이지</td>
     <td align="center">메인/로그인 페이지</td>
     <td align="center">제작/로딩 페이지</td>
-    <td align="center">조회/작성 페이지</td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/ah-o-ng12">이아영</td>
