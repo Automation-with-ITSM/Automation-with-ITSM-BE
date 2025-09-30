@@ -1,4 +1,4 @@
-name: Create and Sync GitHub Issue to Jira
+name: Create Jira Task from GitHub Issue
 on:
   issues:
     types: [opened]
@@ -14,12 +14,26 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
-      - name: Create Jira Issue
+      - name: Determine Task Type from GitHub Labels
+        id: task_type
+        run: |
+          LABELS='${{ toJson(github.event.issue.labels) }}'
+          echo "Labels: $LABELS"
+          if echo "$LABELS" | grep -q '"feature"'; then
+            echo "TASK_TYPE=Feature" >> $GITHUB_ENV
+          elif echo "$LABELS" | grep -q '"fix"'; then
+            echo "TASK_TYPE=Fix" >> $GITHUB_ENV
+          elif echo "$LABELS" | grep -q '"refactor"'; then
+            echo "TASK_TYPE=Refactor" >> $GITHUB_ENV
+          else
+            echo "TASK_TYPE=General" >> $GITHUB_ENV
+
+      - name: Create Jira Task
         uses: atlassian/gajira-create@v3
         with:
           project: YOUR_PROJECT_KEY
-          issuetype: ${{ github.event.issue.labels[0].name == 'bug' && 'Bug' || 'Task' }}
-          summary: "${{ github.event.issue.title }}"
+          issuetype: Task
+          summary: "[${{ env.TASK_TYPE }}] ${{ github.event.issue.title }}"
           description: |
             GitHub Issue: ${{ github.event.issue.html_url }}
             ${{ github.event.issue.body }}
