@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Render template and create issue
-        id: create_issue # 참조용 id 추가
+        id: create_issue
         uses: actions/github-script@v7
         with:
           script: |
@@ -33,10 +33,8 @@ jobs:
             };
             const decodeMaybe = (s) => {
               const str = esc(s);
-              // Jira에서 urlEncode 했으면 % 기호 포함 → decodeURIComponent 적용
-              try {
-                return /%[0-9A-Fa-f]{2}/.test(str) ? decodeURIComponent(str) : str;
-              } catch { return str; }
+              try { return /%[0-9A-Fa-f]{2}/.test(str) ? decodeURIComponent(str) : str; }
+              catch { return str; }
             };
 
             // 1) 템플릿 선택
@@ -76,7 +74,6 @@ jobs:
               .replaceAll('{{duedate}}', duedate)
               .replaceAll('{{checklist}}', checklist || '');
 
-            // 템플릿에 {{checklist}}가 없다면 섹션을 추가로 붙여줌
             if (checklist && !tpl.includes('{{checklist}}')) {
               body += `\n\n---\n\n## ✅ To-Do\n${checklist}\n`;
             }
@@ -90,10 +87,10 @@ jobs:
               let incoming = [];
               if (Array.isArray(p.labels)) incoming = p.labels;
               else if (typeof p.labels === 'string') {
-                // "A, B" or "['A','B']" 모두 대응
                 try {
                   const parsed = JSON.parse(p.labels);
                   if (Array.isArray(parsed)) incoming = parsed;
+                  else incoming = p.labels.split(',').map(s=>s.trim()).filter(Boolean);
                 } catch {
                   incoming = p.labels.split(',').map(s=>s.trim()).filter(Boolean);
                 }
@@ -111,32 +108,32 @@ jobs:
               body,
               labels
             });
-            
-            core.setOutput('number', res.data.number); # 다음 스텝에서 쓸 수 있도록 출력으로 전달
+
+            // ✅ 다음 스텝에서 사용
+            core.setOutput('number', res.data.number); // JS 주석으로!
             core.info(`Created issue #${res.data.number}`);
 
       - name: Comment branch link
         if: ${{ success() }}
         uses: actions/github-script@v7
+        env:
+          ISSUE_NUMBER: ${{ steps.create_issue.outputs.number }}   # ✅ env로 주입
         with:
           script: |
             const p = context.payload.client_payload || {};
-            const issue_number = Number(`${{ steps.create_issue.outputs.number }}`);
-
-            // 1) payload.branch가 오면 그대로 사용
-            let branch = (p.branch || '').trim();
-
-            // 2) payload에 branch가 없다면 규칙 기반으로 유추
+            const issue_number = Number(process.env.ISSUE_NUMBER || 0); // ✅ env에서 읽기
             const esc = (s) => (s ?? '').toString();
+
+            // 1) payload.branch 우선
+            let branch = esc(p.branch).trim();
+
+            // 2) payload에 없으면 규칙 기반 추론
             const key  = esc(p.key);
             const kind = esc(p.kind).toLowerCase();
-
             if (!branch && key) {
-              // 네가 설명한 현 상황: Jira가 "기능/{{issue.key}}" 등으로 생성 → GitHub에선 bug/SCRUM-11 형태
               if (kind.startsWith('bug')) branch = `bug/${key}`;
               else if (kind.startsWith('story')) branch = `story/${key}`;
               else {
-                // Task는 라벨을 보고 세부 prefix 결정
                 let labels = [];
                 if (Array.isArray(p.labels)) labels = p.labels;
                 else if (typeof p.labels === 'string') {
@@ -152,22 +149,32 @@ jobs:
                 if (set.has('feature')) branch = `feature/${key}`;
                 else if (set.has('refactor')) branch = `refactor/${key}`;
                 else if (set.has('documentation')) branch = `documentation/${key}`;
-                else branch = `task/${key}`; // 최후의 보루
+                else branch = `task/${key}`;
               }
             }
 
             if (!branch || !issue_number) {
-              core.info('No branch or issue_number to comment. Skip.');
+              core.info(`No branch or issue_number to comment. Skip. branch='${branch}', issue_number='${issue_number}'`);
               return;
             }
 
             const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/tree/${encodeURIComponent(branch)}`;
 
+            // 템플릿 리터럴 대신 안전 조립
+            const bodyLines = [
+              '🌿 **Branch:** `' + branch + '`',
+              '',
+              '[Open branch](' + url + ')',
+              '',
+              '> Tip: Add `Fixes #' + issue_number + '` in your PR to auto-close this issue.'
+            ];
+            const commentBody = bodyLines.join('\n');
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number,
-              body: `🌿 **Branch:** \`${branch}\`\n\n[Open branch](${url})\n\n> Tip: Add \`Fixes #${issue_number}\` in your PR to auto-close this issue.`
+              body: commentBody
             });
 
             core.info(`Added branch comment to issue #${issue_number}: ${branch}`);
