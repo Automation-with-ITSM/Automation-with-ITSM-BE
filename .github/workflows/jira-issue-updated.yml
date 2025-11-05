@@ -207,4 +207,79 @@ jobs:
               await github.rest.issues.setLabels({ owner, repo, issue_number, labels: computed });
             }
 
-            core.info(`Patched #${issue_number} titleChanged=${nextTitle!==curTitle} bodyChanged=${nextBody!==curBody} labelsSet=${setLabels} kind=${kind} computed=${JSON.stringify(computed)}`);
+            core.info(`Patched #${issue_number} titleChanged=${nextTitle!==curTitle} bodyChanged=${nextBody!==curBody} labelsSet=${setLabels} kind=${kind} computed=${JSON.stringify(computed)}`)
+
+      # 🔽🔽🔽 여기부터 "Assignees 매핑" 스텝 추가
+      - name: Assign mapped GitHub users
+        uses: actions/github-script@v7
+        env:
+          # 시크릿 폴백도 허용(선택)
+          JIRA_GIT_USER_MAPPING_JSON: ${{ secrets.JIRA_GIT_USER_MAPPING_JSON }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // payload / issue_number
+            const p = context.payload.client_payload || {};
+            const issue_number = Number(p.issue_number);
+            if (!issue_number) {
+              core.info('No issue_number in payload. Skip assigning.');
+              return;
+            }
+
+            // 1) 매핑 로드: 파일 우선 → 시크릿 폴백
+            const mapPath = path.join(process.cwd(), '.github/jira-git-user-mapping.json');
+            let raw = '';
+            if (fs.existsSync(mapPath)) {
+              raw = fs.readFileSync(mapPath, 'utf8');
+              core.info(`Mapping file found at ${mapPath} (len=${raw.length})`);
+            } else if (process.env.JIRA_GIT_USER_MAPPING_JSON) {
+              raw = process.env.JIRA_GIT_USER_MAPPING_JSON;
+              core.info(`Mapping loaded from secret JIRA_GIT_USER_MAPPING_JSON (len=${raw.length})`);
+            } else {
+              core.info('No mapping (file/secret). Skip assigning.');
+              return;
+            }
+
+            // 1-1) BOM 제거 + 파싱 + 키 소문자 정규화
+            let mapping = {};
+            try {
+              raw = raw.replace(/^\uFEFF/, '');
+              const parsed = JSON.parse(raw);
+              for (const [k, v] of Object.entries(parsed)) {
+                mapping[String(k).toLowerCase()] = String(v);
+              }
+            } catch (e) {
+              core.warning(`Failed to parse mapping JSON: ${e.message}`);
+              return;
+            }
+
+            // 2) Jira payload에서 식별자 뽑기
+            //    우선순위: 이메일 → (옵션) accountId
+            const email = (p.assigneeEmail || '').trim().toLowerCase();
+            const accountId = (p.assigneeId || '').trim(); // 필요시 매핑에 accountId도 추가 가능
+            core.info(`assigneeEmail="${email || '(empty)'}" assigneeId="${accountId || '(empty)'}"`);
+
+            // 3) 매핑 조회
+            const assignees = [];
+            if (email && mapping[email]) assignees.push(mapping[email]);
+            else if (accountId && mapping[accountId.toLowerCase?.() ?? accountId]) assignees.push(mapping[accountId.toLowerCase?.() ?? accountId]);
+
+            if (assignees.length === 0) {
+              core.info('No mapped assignees. Skip.');
+              return;
+            }
+
+            // 4) GitHub에 배정 (권한 없는 계정이면 422)
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                assignees
+              });
+              core.info(`Assigned: ${assignees.join(', ')}`);
+            } catch (e) {
+              core.warning(`Failed to add assignees: ${e.status} ${e.message}`);
+            }
