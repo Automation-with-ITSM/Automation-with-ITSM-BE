@@ -1,0 +1,114 @@
+name: Create GitHub Issue from Jira
+
+on:
+  repository_dispatch:
+    types: [jira-issue]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Render template and create issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const p = context.payload.client_payload || {};
+            const kind = (p.kind || '').toLowerCase();
+
+            // --- helpers ---
+            const esc = (s) => (s ?? '').toString();
+            const nz  = (s, fallback='') => {
+              const v = (s ?? '').toString().trim();
+              return v.length ? v : fallback;
+            };
+            const decodeMaybe = (s) => {
+              const str = esc(s);
+              // Jira에서 urlEncode 했으면 % 기호 포함 → decodeURIComponent 적용
+              try {
+                return /%[0-9A-Fa-f]{2}/.test(str) ? decodeURIComponent(str) : str;
+              } catch { return str; }
+            };
+
+            // 1) 템플릿 선택
+            const mapping = {
+              story: '.github/ISSUE_TEMPLATE/automation-story.md',
+              bug:   '.github/ISSUE_TEMPLATE/automation-bug.md',
+              task:  '.github/ISSUE_TEMPLATE/automation-task.md'
+            };
+            const file = mapping[kind] || mapping.task;
+            const templatePath = path.join(process.cwd(), file);
+            if (!fs.existsSync(templatePath)) {
+              core.setFailed(`Template not found: ${file}`);
+              return;
+            }
+            const tpl = fs.readFileSync(templatePath, 'utf8');
+
+            // 2) 값 준비
+            const key         = esc(p.key);
+            const url         = esc(p.url);
+            const summary     = esc(p.summary);
+            const description = esc(p.description);
+            const priority    = esc(p.priority);
+            const duedate     = nz(p.duedate, '미정');
+            const checklist   = decodeMaybe(p.checklist);
+
+            // 3) 템플릿 치환
+            let body = tpl
+              .replaceAll('{{issue.key}}', key)
+              .replaceAll('{{key}}', key)
+              .replaceAll('{{issue.url}}', url)
+              .replaceAll('{{url}}', url)
+              .replaceAll('{{issue.summary}}', summary)
+              .replaceAll('{{summary}}', summary)
+              .replaceAll('{{description}}', description)
+              .replaceAll('{{priority}}', priority)
+              .replaceAll('{{issue.duedate}}', duedate)
+              .replaceAll('{{duedate}}', duedate)
+              .replaceAll('{{checklist}}', checklist || '');
+
+            // 템플릿에 {{checklist}}가 없다면 섹션을 추가로 붙여줌
+            if (checklist && !tpl.includes('{{checklist}}')) {
+              body += `\n\n---\n\n## ✅ To-Do\n${checklist}\n`;
+            }
+
+            // 4) 라벨 결정
+            const allowed = new Set(['Feature','Refactor','Documentation']);
+            let labels = [];
+            if (kind === 'story') labels = ['Story'];
+            else if (kind === 'bug') labels = ['Bug'];
+            else {
+              let incoming = [];
+              if (Array.isArray(p.labels)) incoming = p.labels;
+              else if (typeof p.labels === 'string') {
+                // "A, B" or "['A','B']" 모두 대응
+                try {
+                  const parsed = JSON.parse(p.labels);
+                  if (Array.isArray(parsed)) incoming = parsed;
+                } catch {
+                  incoming = p.labels.split(',').map(s=>s.trim()).filter(Boolean);
+                }
+              }
+              labels = incoming.filter(v => allowed.has(v));
+              if (labels.length === 0) labels = ['Task'];
+            }
+
+            // 5) 이슈 생성
+            const title = `[${key}] ${summary}`;
+            const res = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels
+            });
+
+            core.info(`Created issue #${res.data.number}`);
