@@ -112,7 +112,7 @@ jobs:
             }
 
             // 매핑 파일 읽기
-            const mapPath = path.join(process.cwd(), '.github/jira-gh-user-map.json');
+            const mapPath = path.join(process.cwd(), '.github/jira-git-user-mapping.json');
             if (!fs.existsSync(mapPath)) {
               core.info('Mapping file not found. Skip assigning.');
               return;
