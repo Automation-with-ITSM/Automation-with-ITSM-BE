@@ -15,8 +15,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Render template and create issue
+        id: create_issue
         uses: actions/github-script@v7
         with:
+          # result를 문자열로 돌려받아 다음 스텝에서 steps.create_issue.outputs.result 로 사용
+          result-encoding: string
           script: |
             const fs = require('fs');
             const path = require('path');
@@ -24,21 +27,10 @@ jobs:
             const p = context.payload.client_payload || {};
             const kind = (p.kind || '').toLowerCase();
 
-            // --- helpers ---
             const esc = (s) => (s ?? '').toString();
-            const nz  = (s, fallback='') => {
-              const v = (s ?? '').toString().trim();
-              return v.length ? v : fallback;
-            };
-            const decodeMaybe = (s) => {
-              const str = esc(s);
-              // Jira에서 urlEncode 했으면 % 기호 포함 → decodeURIComponent 적용
-              try {
-                return /%[0-9A-Fa-f]{2}/.test(str) ? decodeURIComponent(str) : str;
-              } catch { return str; }
-            };
+            const nz  = (s, fallback='') => { const v = (s ?? '').toString().trim(); return v.length ? v : fallback; };
+            const decodeMaybe = (s) => { const str = esc(s); try { return /%[0-9A-Fa-f]{2}/.test(str) ? decodeURIComponent(str) : str; } catch { return str; } };
 
-            // 1) 템플릿 선택
             const mapping = {
               story: '.github/ISSUE_TEMPLATE/automation-story.md',
               bug:   '.github/ISSUE_TEMPLATE/automation-bug.md',
@@ -52,7 +44,6 @@ jobs:
             }
             const tpl = fs.readFileSync(templatePath, 'utf8');
 
-            // 2) 값 준비
             const key         = esc(p.key);
             const url         = esc(p.url);
             const summary     = esc(p.summary);
@@ -61,7 +52,6 @@ jobs:
             const duedate     = nz(p.duedate, '미정');
             const checklist   = decodeMaybe(p.checklist);
 
-            // 3) 템플릿 치환
             let body = tpl
               .replaceAll('{{issue.key}}', key)
               .replaceAll('{{key}}', key)
@@ -75,12 +65,10 @@ jobs:
               .replaceAll('{{duedate}}', duedate)
               .replaceAll('{{checklist}}', checklist || '');
 
-            // 템플릿에 {{checklist}}가 없다면 섹션을 추가로 붙여줌
             if (checklist && !tpl.includes('{{checklist}}')) {
               body += `\n\n---\n\n## ✅ To-Do\n${checklist}\n`;
             }
 
-            // 4) 라벨 결정
             const allowed = new Set(['Feature','Refactor','Documentation']);
             let labels = [];
             if (kind === 'story') labels = ['Story'];
@@ -89,19 +77,13 @@ jobs:
               let incoming = [];
               if (Array.isArray(p.labels)) incoming = p.labels;
               else if (typeof p.labels === 'string') {
-                // "A, B" or "['A','B']" 모두 대응
-                try {
-                  const parsed = JSON.parse(p.labels);
-                  if (Array.isArray(parsed)) incoming = parsed;
-                } catch {
-                  incoming = p.labels.split(',').map(s=>s.trim()).filter(Boolean);
-                }
+                try { const parsed = JSON.parse(p.labels); if (Array.isArray(parsed)) incoming = parsed; }
+                catch { incoming = p.labels.split(',').map(s=>s.trim()).filter(Boolean); }
               }
               labels = incoming.filter(v => allowed.has(v));
               if (labels.length === 0) labels = ['Task'];
             }
 
-            // 5) 이슈 생성
             const title = `[${key}] ${summary}`;
             const res = await github.rest.issues.create({
               owner: context.repo.owner,
@@ -112,9 +94,10 @@ jobs:
             });
 
             core.info(`Created issue #${res.data.number}`);
+            // ✅ 이 값을 다음 스텝에서 steps.create_issue.outputs.result 로 받는다
+            return String(res.data.number);
 
-      - name: Assign mapped users
-        if: ${{ success() }}
+      - name: Assign mapped GitHub users
         uses: actions/github-script@v7
         with:
           script: |
@@ -122,37 +105,33 @@ jobs:
             const path = require('path');
 
             const p = context.payload.client_payload || {};
-            const issue_number = Number('${{ steps.create_issue.outputs.number }}');
+            const issue_number = Number('${{ steps.create_issue.outputs.result }}');
             if (!issue_number) {
               core.info('No issue number. Skip assignees.');
               return;
             }
 
-            // 1) 매핑 파일 읽기
+            // 매핑 파일 읽기
             const mapPath = path.join(process.cwd(), '.github/jira-gh-user-map.json');
-            let mapping = {};
-            if (fs.existsSync(mapPath)) {
-              try {
-                mapping = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
-              } catch (e) {
-                core.warning(`Failed to parse mapping file: ${e.message}`);
-              }
-            } else {
+            if (!fs.existsSync(mapPath)) {
               core.info('Mapping file not found. Skip assigning.');
               return;
             }
+            let mapping = {};
+            try {
+              mapping = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
+            } catch (e) {
+              core.warning(`Failed to parse mapping file: ${e.message}`);
+              return;
+            }
 
-            // 2) Jira payload에서 담당자 후보 뽑기 (여러명 확장 여지)
-            const cand = [];
-            if (p.assigneeId)   cand.push(String(p.assigneeId));
-            // 필요하면 reporter/initiator 등도 확장
-            // if (p.reporterId) cand.push(String(p.reporterId));
-
-            // 3) 매핑 → GitHub usernames
+            // Jira payload에서 이메일 우선, 없으면 displayName로 fallback 하고 싶으면 여기에 추가
+            const email = (p.assigneeEmail || '').trim().toLowerCase();
             const assignees = [];
-            for (const k of cand) {
-              const gh = mapping[k];
-              if (gh && !assignees.includes(gh)) assignees.push(gh);
+            if (email && mapping[email]) {
+              assignees.push(mapping[email]);
+            } else {
+              core.info(`No mapping for assigneeEmail "${email}"`);
             }
 
             if (assignees.length === 0) {
@@ -160,7 +139,6 @@ jobs:
               return;
             }
 
-            // 4) Assignees 지정 (존재하지/권한 없는 사용자면 GitHub가 422)
             try {
               await github.rest.issues.addAssignees({
                 owner: context.repo.owner,
@@ -171,13 +149,4 @@ jobs:
               core.info(`Assigned: ${assignees.join(', ')}`);
             } catch (e) {
               core.warning(`Failed to add assignees: ${e.status} ${e.message}`);
-              // Fallback: 코멘트로라도 남겨주기
-              try {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number,
-                  body: `Could not assign automatically. Intended assignees: ${assignees.map(a=>`@${a}`).join(' ')}`
-                });
-              } catch {}
             }
