@@ -112,3 +112,72 @@ jobs:
             });
 
             core.info(`Created issue #${res.data.number}`);
+
+      - name: Assign mapped users
+        if: ${{ success() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const p = context.payload.client_payload || {};
+            const issue_number = Number('${{ steps.create_issue.outputs.number }}');
+            if (!issue_number) {
+              core.info('No issue number. Skip assignees.');
+              return;
+            }
+
+            // 1) 매핑 파일 읽기
+            const mapPath = path.join(process.cwd(), '.github/jira-gh-user-map.json');
+            let mapping = {};
+            if (fs.existsSync(mapPath)) {
+              try {
+                mapping = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
+              } catch (e) {
+                core.warning(`Failed to parse mapping file: ${e.message}`);
+              }
+            } else {
+              core.info('Mapping file not found. Skip assigning.');
+              return;
+            }
+
+            // 2) Jira payload에서 담당자 후보 뽑기 (여러명 확장 여지)
+            const cand = [];
+            if (p.assigneeId)   cand.push(String(p.assigneeId));
+            // 필요하면 reporter/initiator 등도 확장
+            // if (p.reporterId) cand.push(String(p.reporterId));
+
+            // 3) 매핑 → GitHub usernames
+            const assignees = [];
+            for (const k of cand) {
+              const gh = mapping[k];
+              if (gh && !assignees.includes(gh)) assignees.push(gh);
+            }
+
+            if (assignees.length === 0) {
+              core.info('No mapped assignees. Skip.');
+              return;
+            }
+
+            // 4) Assignees 지정 (존재하지/권한 없는 사용자면 GitHub가 422)
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                assignees
+              });
+              core.info(`Assigned: ${assignees.join(', ')}`);
+            } catch (e) {
+              core.warning(`Failed to add assignees: ${e.status} ${e.message}`);
+              // Fallback: 코멘트로라도 남겨주기
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number,
+                  body: `Could not assign automatically. Intended assignees: ${assignees.map(a=>`@${a}`).join(' ')}`
+                });
+              } catch {}
+            }
