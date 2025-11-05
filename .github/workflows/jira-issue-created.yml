@@ -112,3 +112,60 @@ jobs:
             });
 
             core.info(`Created issue #${res.data.number}`);
+
+      - name: Comment branch link
+        if: ${{ success() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const p = context.payload.client_payload || {};
+            const issue_number = Number(`${{ steps.create_issue.outputs.number }}`);
+
+            // 1) payload.branch가 오면 그대로 사용
+            let branch = (p.branch || '').trim();
+
+            // 2) payload에 branch가 없다면 규칙 기반으로 유추
+            const esc = (s) => (s ?? '').toString();
+            const key  = esc(p.key);
+            const kind = esc(p.kind).toLowerCase();
+
+            if (!branch && key) {
+              // 네가 설명한 현 상황: Jira가 "기능/{{issue.key}}" 등으로 생성 → GitHub에선 bug/SCRUM-11 형태
+              if (kind.startsWith('bug')) branch = `bug/${key}`;
+              else if (kind.startsWith('story')) branch = `story/${key}`;
+              else {
+                // Task는 라벨을 보고 세부 prefix 결정
+                let labels = [];
+                if (Array.isArray(p.labels)) labels = p.labels;
+                else if (typeof p.labels === 'string') {
+                  try {
+                    const parsed = JSON.parse(p.labels);
+                    if (Array.isArray(parsed)) labels = parsed;
+                    else labels = p.labels.split(',').map(s=>s.trim()).filter(Boolean);
+                  } catch {
+                    labels = p.labels.split(',').map(s=>s.trim()).filter(Boolean);
+                  }
+                }
+                const set = new Set(labels.map(v => v.toString().toLowerCase()));
+                if (set.has('feature')) branch = `feature/${key}`;
+                else if (set.has('refactor')) branch = `refactor/${key}`;
+                else if (set.has('documentation')) branch = `documentation/${key}`;
+                else branch = `task/${key}`; // 최후의 보루
+              }
+            }
+
+            if (!branch || !issue_number) {
+              core.info('No branch or issue_number to comment. Skip.');
+              return;
+            }
+
+            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/tree/${encodeURIComponent(branch)}`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body: `🌿 **Branch:** \`${branch}\`\n\n[Open branch](${url})\n\n> Tip: Add \`Fixes #${issue_number}\` in your PR to auto-close this issue.`
+            });
+
+            core.info(`Added branch comment to issue #${issue_number}: ${branch}`);
