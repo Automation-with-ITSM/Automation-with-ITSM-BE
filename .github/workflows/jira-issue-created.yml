@@ -18,7 +18,7 @@ jobs:
         id: create_issue
         uses: actions/github-script@v7
         with:
-          # result를 문자열로 돌려받아 다음 스텝에서 steps.create_issue.outputs.result 로 사용
+          # result를 문자열로 돌려받아소 다음 스텝에서 steps.create_issue.outputs.result로 사용할 예정 ㅇㅇ
           result-encoding: string
           script: |
             const fs = require('fs');
@@ -94,7 +94,7 @@ jobs:
             });
 
             core.info(`Created issue #${res.data.number}`);
-            // ✅ 이 값을 다음 스텝에서 steps.create_issue.outputs.result 로 받는다
+            // 아까 위에서 말했던 대로 이 값을 다음 스텝에서 steps.create_issue.outputs.result로 받음!
             return String(res.data.number);
 
       - name: Assign mapped GitHub users
@@ -125,7 +125,7 @@ jobs:
               return;
             }
 
-            // Jira payload에서 이메일 우선, 없으면 displayName로 fallback 하고 싶으면 여기에 추가
+            // Jira payload에서 이메일 우선
             const email = (p.assigneeEmail || '').trim().toLowerCase();
             const assignees = [];
             if (email && mapping[email]) {
