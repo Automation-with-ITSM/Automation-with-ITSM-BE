@@ -14,14 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # (선택) 들어온 payload를 한 번 확인하고 싶을 때 켠다
-      - name: Debug payload (optional)
-        run: echo "${{ toJson(github.event.client_payload) }}"
-
       - name: Render via template and safe patch (with Jira fetch fallback)
         uses: actions/github-script@v7
         env:
-          # 🔐 레포/Org Secrets로 추가해둔 값 사용
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
@@ -30,7 +25,7 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            // Node20은 global fetch가 존재. 없을 경우를 대비해 require fallback
+            // Node20은 global fetch가 존재하니 만약 없을 경우를 대비해서 require fallback
             const fetch = global.fetch || ((...args) => import('node-fetch').then(({default: f}) => f(...args)));
 
             const p   = context.payload.client_payload || {};
@@ -47,7 +42,6 @@ jobs:
               } catch { return str; }
             };
 
-            // ✅ Jira에서 rendered description(HTML) 보강
             async function fetchJiraDescriptionHTML(issueKey) {
               const base = (process.env.JIRA_BASE_URL || process.env.JIRA_BASE || '').replace(/\/+$/,'');
               if (!base || !issueKey) return '';
@@ -66,7 +60,7 @@ jobs:
               return (data.renderedFields && data.renderedFields.description) ? data.renderedFields.description : '';
             }
 
-            // 🔧 체크리스트를 깃허브 체크박스로 정규화
+            // 체크리스트를 깃허브 체크박스로 정규화
             function normalizeChecklist(input) {
               const raw = decodeMaybe(input);
               if (!has(raw)) return '';
@@ -81,14 +75,14 @@ jobs:
               }).join('\n');
             }
 
-            // 0) 필수값: GH 이슈번호
+            // 0) 필수값: Jira에서의 "GitHub Issue Number"
             const issue_number = Number(p.issue_number);
             if (!issue_number) { core.setFailed('Missing issue_number in payload'); return; }
 
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
 
-            // 1) 현재 GH 이슈 읽기(빈값 덮어쓰기 방지)
+            // 1) 현재 GitHub Issue 읽기(빈값 덮어쓰기 방지)
             const cur = await github.rest.issues.get({ owner, repo, issue_number });
             const curTitle  = cur.data.title || '';
             const curBody   = cur.data.body  || '';
@@ -100,7 +94,7 @@ jobs:
             const isBug   = /^(bug|버그)/.test(rawKind);
             const kind    = isStory ? 'story' : (isBug ? 'bug' : 'task');
 
-            // 3) 템플릿 선택 (업데이트도 생성과 동일 템플릿 사용)
+            // 3) 템플릿 선택
             const mapping = {
               story: '.github/ISSUE_TEMPLATE/automation-story.md',
               bug:   '.github/ISSUE_TEMPLATE/automation-bug.md',
@@ -115,14 +109,14 @@ jobs:
             const key         = esc(p.key);
             const urlLink     = esc(p.url);
             const summary     = esc(p.summary);
-            let   description = esc(p.description);   // payload가 비면 Jira API로 보강
+            let   description = esc(p.description);
             const priority    = esc(p.priority);
             const duedate     = nz(p.duedate, '미정');
             const checklistMD = normalizeChecklist(p.checklist);
 
             if (!description.trim() && key) {
               const html = await fetchJiraDescriptionHTML(key);
-              if (has(html)) description = html; // HTML 그대로 사용(깃허브 이슈 본문은 기본 HTML 렌더 OK)
+              if (has(html)) description = html;
             }
 
             // 5) 템플릿 바인딩
@@ -146,7 +140,6 @@ jobs:
               }
               producedBody = body.trim();
             } else {
-              // 템플릿이 없을 때 최소 안전 조립 (fallback)
               const parts = [];
               if (has(description)) {
                 parts.push('## 📄 이슈 개요 (Description)', description, ''); // HTML 그대로
@@ -167,17 +160,17 @@ jobs:
               producedBody = parts.join('\n').trim();
             }
 
-            // 6) 본문 교체 조건 (값이 오거나 현재 비어있을 때만 교체)
+            // 6) 본문 교체 조건 : 값이 오거나 현재 비어있을 때만 교체
             const shouldReplaceBody =
               has(description) || has(checklistMD) || has(priority) || has(duedate) || has(key) || has(urlLink) || !curBody;
             const nextBody = shouldReplaceBody ? (producedBody || curBody) : curBody;
 
-            // 7) 제목: 값이 비면 기존 유지
+            // 7) 제목 : 값이 비면 기존 유지
             const nextTitle = (has(key) || has(summary))
               ? `[${nz(key, curTitle)}] ${nz(summary, curTitle)}`
               : curTitle;
 
-            // 8) 라벨 계산 (Story/Bug 고정, Task는 3종만; 비면 기존 유지)
+            // 8) 라벨 계산 (Story/Bug 고정, Task는 3종만) + (비면 기존 유지)
             const allowed = new Set(['Feature','Refactor','Documentation','Story','Bug']);
             let computed = [];
             if (isStory) computed = ['Story'];
@@ -197,7 +190,7 @@ jobs:
               const toTitle = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
               computed = incoming.map(toTitle).filter(v => allowed.has(v) && v !== 'Story' && v !== 'Bug');
             }
-            const setLabels = computed.length > 0; // 비면 기존 라벨 유지(불필요한 'Task' 생성 방지)
+            const setLabels = computed.length > 0; // 비면 기존 라벨 유지
 
             // 9) 패치
             if (nextTitle !== curTitle || nextBody !== curBody) {
@@ -209,11 +202,10 @@ jobs:
 
             core.info(`Patched #${issue_number} titleChanged=${nextTitle!==curTitle} bodyChanged=${nextBody!==curBody} labelsSet=${setLabels} kind=${kind} computed=${JSON.stringify(computed)}`)
 
-      # 🔽🔽🔽 여기부터 "Assignees 매핑" 스텝 추가
+      # Assignees 매핑 스텝 추가
       - name: Assign mapped GitHub users
         uses: actions/github-script@v7
         env:
-          # 시크릿 폴백도 허용(선택)
           JIRA_GIT_USER_MAPPING_JSON: ${{ secrets.JIRA_GIT_USER_MAPPING_JSON }}
         with:
           script: |
@@ -228,7 +220,7 @@ jobs:
               return;
             }
 
-            // 1) 매핑 로드: 파일 우선 → 시크릿 폴백
+            // 1) 매핑 로드 : 파일 우선 → 시크릿 폴백
             const mapPath = path.join(process.cwd(), '.github/jira-git-user-mapping.json');
             let raw = '';
             if (fs.existsSync(mapPath)) {
@@ -256,7 +248,7 @@ jobs:
             }
 
             // 2) Jira payload에서 식별자 뽑기
-            //    우선순위: 이메일 → (옵션) accountId
+            //    우선순위 : 이메일 → (옵션) accountId
             const email = (p.assigneeEmail || '').trim().toLowerCase();
             const accountId = (p.assigneeId || '').trim(); // 필요시 매핑에 accountId도 추가 가능
             core.info(`assigneeEmail="${email || '(empty)'}" assigneeId="${accountId || '(empty)'}"`);
