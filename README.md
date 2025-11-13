@@ -2,7 +2,7 @@
 
 ![표지](https://github.com/user-attachments/assets/38077619-6e54-4ef4-b17f-6facb597ef09)
 
-> PR 머지 후 자동 JIRA 업무 완료하기5
+> PR 머지 후 자동 JIRA 업무 완료하기6
 
 ##  서비스 소개
 <div align="left">
